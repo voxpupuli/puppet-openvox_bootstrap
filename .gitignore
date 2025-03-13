@@ -1,0 +1,4 @@
+.modules
+.plan_cache.json
+.task_cache.json
+Puppetfile

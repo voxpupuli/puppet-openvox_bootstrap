@@ -1,1 +1,4 @@
-name: openvox-bootstrap
+name: openvox_bootstrap
+modules:
+  - name: puppetlabs-facts
+    version_requirement: ">= 0.1.0 < 2.0.0"

@@ -1,0 +1,27 @@
+{
+  "description": "Installs the openvox-agent package.",
+  "parameters": {
+    "version": {
+      "description": "The version of the openvox-agent package to install. Defaults to latest.",
+      "type": "Optional[String]"
+    },
+    "collection": {
+      "description": "The openvox collection to install from.",
+      "type": "String",
+      "default": "openvox8"
+    },
+    "apt_source": {
+      "description": "The apt source repository to retrieve deb packages from.",
+      "type": "Optional[String]",
+      "default": "http://apt.overlookinfratech.com"
+    },
+    "yum_source": {
+      "description": "The yum source repository to retrieve rpm packages from.",
+      "type": "Optional[String]",
+      "default": "http://yum.overlookinfratech.com"
+    }
+  },
+  "implementations": [
+    {"name": "install_linux.sh", "requirements": ["shell"]}
+  ]
+}

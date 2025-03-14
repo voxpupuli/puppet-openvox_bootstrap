@@ -61,7 +61,7 @@ set_platform() {
     full_version=$(bash "${facts}" release)
     assigned 'full_version'
   else
-    fail "Unable to find the puppetlabs-facts bash task to determine platform."
+    fail "Unable to find the puppetlabs-facts bash task to determine platform at '${facts}'."
   fi
 }
 
@@ -140,10 +140,26 @@ set_collection_url() {
   else
     package_name="${collection}-release-${family}${full_version}.${package_file_suffix}"
   fi
-  package_url="https://${repository}/${package_name}"
+  package_url="${repository}/${package_name}"
   
   assigned 'package_name'
   assigned 'package_url'
+}
+
+exec_and_capture() {
+  local _cmd="$*"
+
+  info "Executing: ${_cmd}"
+  local _result
+
+  set +e
+  result=$(${_cmd} 2>&1)
+  local _status=$?
+  set -e
+
+  echo "${result}"
+  info "Status: ${_status}"
+  return $_status
 }
 
 # Download the given url to the given local file path.
@@ -152,9 +168,9 @@ download() {
   local _file="$2"
 
   if exists 'wget'; then
-    wget -O "${_file}" "${_url}" 
+    exec_and_capture wget -O "${_file}" "${_url}"
   elif exists 'curl'; then
-    curl -sSL -o "${_file}" "${_url}" 
+    exec_and_capture curl -sSL -o "${_file}" "${_url}"
   else
     fail "Unable to download ${_url}. Neither wget nor curl are installed."
   fi
@@ -180,13 +196,14 @@ install_release_package() {
   local _package_type="$1"
   local _package_file="$2"
 
+  info "Installing release package: ${_package_file}"
   case $_package_type in
     rpm)
-      rpm -Uvh "$_package_file"
+      exec_and_capture rpm -Uvh "$_package_file"
       ;;
     deb)
-      dpkg -i "$_package_file"
-      apt update
+      exec_and_capture dpkg -i "$_package_file"
+      exec_and_capture apt update
       ;;
     *)
       fail "Unhandled package type: '${package_type}'"
@@ -197,14 +214,15 @@ install_release_package() {
 install_package() {
   local _package="$1"
 
+  info "Installing ${_package}"
   if exists 'dnf'; then
-    dnf install -y "$_package"
+    exec_and_capture dnf install -y "$_package"
   elif exists 'yum'; then
-    yum install -y "$_package"
+    exec_and_capture yum install -y "$_package"
   elif exists 'zypper'; then
-    zypper install -y "$_package"
+    exec_and_capture zypper install -y "$_package"
   elif exists 'apt'; then
-    apt install -y "$_package"
+    exec_and_capture apt install -y "$_package"
   else
     fail "Unable to install ${_package}. Neither dnf, yum, zypper, nor apt are installed."
   fi

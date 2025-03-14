@@ -1,4 +1,6 @@
 .modules
 .plan_cache.json
+.rerun.json
+.resource_types
 .task_cache.json
 Puppetfile

@@ -4,10 +4,10 @@ name: 'PR Tests'
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   shellcheck:
@@ -20,21 +20,21 @@ jobs:
         run: shellcheck tasks/*.sh
 
   test-install-task-on-ubuntu:
-    runs-on: ubuntu-latest
+    # Perforce hasn't yet released bolt on 24.04.
+    runs-on: ubuntu-22.04
     needs: shellcheck
     steps:
       - uses: actions/checkout@v4
-      #      - name: Install dependencies
-      #        run: sudo apt wget
       - name: Install Bolt
         run: |-
-          wget https://apt.puppet.com/puppet-tools-release-noble.deb
-          sudo dpkg -i puppet-tools-release-noble.deb
+          wget https://apt.puppet.com/puppet-tools-release-jammy.deb
+          sudo dpkg -i puppet-tools-release-jammy.deb
           sudo apt update
           sudo apt install -y puppet-bolt
       - name: Install module dependencies
         run: bolt module install
       - name: Run openvox-agent install task
-        run: bolt task run openvox_bootstrap::install --targets localhost
+        run: bolt task run openvox_bootstrap::install --targets localhost --run-as root
       - name: Verify openvox-agent is installed
-        run: puppet --version
+        run: |-
+          [[ "$(/opt/puppetlabs/bin/puppet --version)" =~ [0-9]+\.[0-9]+\.[0-9]+ ]]

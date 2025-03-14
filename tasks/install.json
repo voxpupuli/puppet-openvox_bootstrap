@@ -13,15 +13,19 @@
     "apt_source": {
       "description": "The apt source repository to retrieve deb packages from.",
       "type": "Optional[String]",
-      "default": "http://apt.overlookinfratech.com"
+      "default": "https://apt.overlookinfratech.com"
     },
     "yum_source": {
       "description": "The yum source repository to retrieve rpm packages from.",
       "type": "Optional[String]",
-      "default": "http://yum.overlookinfratech.com"
+      "default": "https://yum.overlookinfratech.com"
     }
   },
   "implementations": [
-    {"name": "install_linux.sh", "requirements": ["shell"]}
+    {
+      "name": "install_linux.sh",
+      "requirements": ["shell"],
+      "files": ["facts/tasks/bash.sh"]
+    }
   ]
 }

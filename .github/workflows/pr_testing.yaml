@@ -20,15 +20,22 @@ jobs:
         run: shellcheck tasks/*.sh
 
   test-install-task-on-ubuntu:
+    strategy:
+      matrix:
+        os-details:
+          - os: ubuntu-20.04
+            codename: focal
+          - os: ubuntu-22.04
+            codename: jammy
     # Perforce hasn't yet released bolt on 24.04.
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.os-details.os }}
     needs: shellcheck
     steps:
       - uses: actions/checkout@v4
       - name: Install Bolt
         run: |-
-          wget https://apt.puppet.com/puppet-tools-release-jammy.deb
-          sudo dpkg -i puppet-tools-release-jammy.deb
+          wget https://apt.puppet.com/puppet-tools-release-${{ matrix.os-details.codename }}.deb
+          sudo dpkg -i puppet-tools-release-${{ matrix.os-details.codename }}.deb
           sudo apt update
           sudo apt install -y puppet-bolt
       - name: Install module dependencies
@@ -38,3 +45,59 @@ jobs:
       - name: Verify openvox-agent is installed
         run: |-
           [[ "$(/opt/puppetlabs/bin/puppet --version)" =~ [0-9]+\.[0-9]+\.[0-9]+ ]]
+
+  test-install-task-on-other-os-via-containers:
+    strategy:
+      matrix:
+        image:
+          - rockylinux:8
+          - rockylinux:9
+          - debian:10
+          - debian:11
+          - debian:12
+          # Need to pull in the repo GPG keys for sles
+          #          - registry.suse.com/suse/sle15:15.6
+    needs: shellcheck
+    runs-on: ubuntu-latest
+    container: ${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: puppetlabs/puppetlabs-facts
+          path: facts
+      - name: debugging
+        run: |
+          pwd
+          echo "Running on ${{ matrix.image }}"
+          ls -l
+          echo "${GITHUB_WORKSPACE}"
+          ls -l "${GITHUB_WORKSPACE}/.."
+      - name: Ensure wget is installed (apt)
+        if: startsWith(matrix.image, 'debian')
+        run: |
+          if ! command -v wget &> /dev/null; then
+            apt update
+            apt install -y wget
+          fi
+      - name: Ensure wget is installed (dnf)
+        if: startsWith(matrix.image, 'rocky')
+        run: |
+          if ! command -v wget &> /dev/null; then
+            dnf install -y wget
+          fi
+      - name: Ensure wget is installed (zypper)
+        if: contains(matrix.image, 'suse')
+        run: |
+          if ! command -v wget &> /dev/null; then
+            zypper install -y wget
+          fi
+      - name: Run openvox-agent install task manually
+        env:
+          PT__installdir: ${{ github.workspace }}
+          PT_collection: openvox8
+          PT_apt_source: "https://apt.overlookinfratech.com"
+          PT_yum_source: "https://yum.overlookinfratech.com"
+        run: ./tasks/install_linux.sh
+      - name: Verify openvox-agent is installed
+        run: /opt/puppetlabs/bin/puppet --version | grep -E '[0-9]+\.[0-9]+'

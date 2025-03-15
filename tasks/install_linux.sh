@@ -71,7 +71,7 @@ set_repository() {
   local _family="$1"
 
   case $_family in
-    amazon|fedora|rhel|sles)
+    amazon|fedora|el|sles)
       repository=$yum_source
       ;;
     debian|ubuntu)
@@ -88,7 +88,7 @@ set_package_type() {
   local _family="$1"
 
   case $_family in
-    amazon|fedora|rhel|sles)
+    amazon|fedora|el|sles)
       package_type='rpm'
       package_file_suffix='noarch.rpm'
       ;;
@@ -112,7 +112,7 @@ set_collection_url() {
       family='amazon'
       ;;
     RHEL|RedHat|CentOS|Scientific|OracleLinux|Rocky|AlmaLinux)
-      family='rhel'
+      family='el'
       ;;
     Fedora)
       family='fedora'
@@ -136,12 +136,14 @@ set_collection_url() {
   set_package_type $family
 
   if [ "${package_type}" == 'rpm' ]; then
-    package_name="${collection}-release-${family}-${full_version}.${package_file_suffix}"
+    major_version=${full_version%%.*}
+    assigned 'major_version'
+    package_name="${collection}-release-${family}-${major_version}.${package_file_suffix}"
   else
     package_name="${collection}-release-${family}${full_version}.${package_file_suffix}"
   fi
   package_url="${repository}/${package_name}"
-  
+
   assigned 'package_name'
   assigned 'package_url'
 }

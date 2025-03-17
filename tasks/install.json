@@ -2,12 +2,12 @@
   "description": "Installs the openvox-agent package.",
   "parameters": {
     "version": {
-      "description": "The version of the openvox-agent package to install. Defaults to latest.",
+      "description": "TODO The version of the openvox-agent package to install. Defaults to latest.",
       "type": "Optional[String]"
     },
     "collection": {
       "description": "The openvox collection to install from.",
-      "type": "String",
+      "type": "Optional[String]",
       "default": "openvox8"
     },
     "apt_source": {

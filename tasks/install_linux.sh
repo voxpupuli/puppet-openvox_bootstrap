@@ -6,11 +6,11 @@ set -e
 # shellcheck disable=SC2154
 installdir=$PT__installdir
 # shellcheck disable=SC2154
-collection=$PT_collection
+collection=${PT_collection:-'openvox8'}
 # shellcheck disable=SC2154
-yum_source=$PT_yum_source
+yum_source=${PT_yum_source:-'https://yum.overlookinfratech.com'}
 # shellcheck disable=SC2154
-apt_source=$PT_apt_source
+apt_source=${PT_apt_source:-'https://apt.overlookinfratech.com'}
 
 tempdir=$(mktemp -d)
 trap 'rm -rf $tempdir' EXIT
@@ -213,6 +213,7 @@ install_release_package() {
   esac
 }
 
+# TODO add support for the version parameter.
 install_package() {
   local _package="$1"
 

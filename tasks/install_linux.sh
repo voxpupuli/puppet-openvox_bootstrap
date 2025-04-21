@@ -226,8 +226,10 @@ install_package() {
     exec_and_capture zypper install -y "$_package"
   elif exists 'apt'; then
     exec_and_capture apt install -y "$_package"
+  elif exists 'apt-get'; then
+    exec_and_capture apt-get install -y "$_package"
   else
-    fail "Unable to install ${_package}. Neither dnf, yum, zypper, nor apt are installed."
+    fail "Unable to install ${_package}. Neither dnf, yum, zypper, apt nor apt-get are installed."
   fi
 }
 

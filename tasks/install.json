@@ -25,7 +25,10 @@
     {
       "name": "install_linux.sh",
       "requirements": ["shell"],
-      "files": ["facts/tasks/bash.sh"]
+      "files": [
+        "facts/tasks/bash.sh",
+        "openvox_bootstrap/files/common.sh"
+      ]
     }
   ]
 }

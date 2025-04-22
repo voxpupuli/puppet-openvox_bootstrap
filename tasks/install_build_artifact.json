@@ -1,0 +1,29 @@
+{
+  "description": "Downloads and installs a package directly from openvox build artifact server. This can be used to help with testing builds prior to release. (To install a released version, use the openvox_bootstrap::install task.)",
+  "parameters": {
+    "version": {
+      "description": "The version of the package to install.",
+      "type": "String[1]"
+    },
+    "package": {
+      "description": "The name of the package to install.",
+      "type": "String[1]",
+      "default": "openvox-agent"
+    },
+    "artifacts_source": {
+      "description": "URL to the build artifacts server.",
+      "type": "String[1]",
+      "default": "https://s3.osuosl.org/openvox-artifacts"
+    }
+  },
+  "implementations": [
+    {
+      "name": "install_build_artifact_linux.sh",
+      "requirements": ["shell"],
+      "files": [
+        "facts/tasks/bash.sh",
+        "openvox_bootstrap/files/common.sh"
+      ]
+    }
+  ]
+}

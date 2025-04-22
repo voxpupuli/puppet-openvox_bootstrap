@@ -165,3 +165,23 @@ install_package_file() {
       ;;
   esac
 }
+
+# TODO add support for the version parameter.
+install_package() {
+  local _package="$1"
+
+  info "Installing ${_package}"
+  if exists 'dnf'; then
+    exec_and_capture dnf install -y "$_package"
+  elif exists 'yum'; then
+    exec_and_capture yum install -y "$_package"
+  elif exists 'zypper'; then
+    exec_and_capture zypper install -y "$_package"
+  elif exists 'apt'; then
+    exec_and_capture apt install -y "$_package"
+  elif exists 'apt-get'; then
+    exec_and_capture apt-get install -y "$_package"
+  else
+    fail "Unable to install ${_package}. Neither dnf, yum, zypper, apt nor apt-get are installed."
+  fi
+}

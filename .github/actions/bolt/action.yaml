@@ -1,0 +1,25 @@
+---
+name: Install and Prepare Bolt
+description: "Helps with installing Bolt from the Puppet repository on Ubuntu distributions."
+
+inputs:
+  os-codename:
+    description: The Ubuntu codename of the OS to install Bolt on.
+    required: true
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install Bolt
+      shell: bash
+      env:
+        OS_CODENAME: ${{ inputs.os-codename }}
+      run: |-
+        wget https://apt.puppet.com/puppet-tools-release-${OS_CODENAME}.deb
+        sudo dpkg -i puppet-tools-release-${OS_CODENAME}.deb
+        sudo apt update
+        sudo apt install -y puppet-bolt
+    - name: Install module dependencies
+      shell: bash
+      run: bolt module install

@@ -1,5 +1,5 @@
 ---
-name: 'PR Tests'
+name: 'PR Tests of the install_build_artifact task'
 
 on:
   push:
@@ -10,16 +10,7 @@ on:
       - main
 
 jobs:
-  shellcheck:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install ShellCheck
-        run: sudo apt-get install shellcheck
-      - name: Run ShellCheck
-        run: shellcheck -x tasks/*.sh files/*.sh
-
-  test-install-task-on-ubuntu:
+  test-install-build-artifact-task-on-ubuntu:
     strategy:
       matrix:
         os-details:
@@ -29,7 +20,6 @@ jobs:
     #        codename: noble
     # Perforce hasn't yet released bolt on 24.04.
     runs-on: ${{ matrix.os-details.os }}
-    needs: shellcheck
     steps:
       - uses: actions/checkout@v4
       - id: install-bolt
@@ -37,12 +27,12 @@ jobs:
         with:
           os-codename: ${{ matrix.os-details.codename }}
       - name: Run openvox-agent install task
-        run: bolt task run openvox_bootstrap::install --targets localhost --run-as root
+        run: bolt task run openvox_bootstrap::install_build_artifact version=8.15.0 --targets localhost --run-as root
       - name: Verify openvox-agent is installed
         run: |-
-          [[ "$(/opt/puppetlabs/bin/puppet --version)" =~ [0-9]+\.[0-9]+\.[0-9]+ ]]
+          [[ "$(/opt/puppetlabs/bin/puppet --version)" = "8.15.0" ]]
 
-  test-install-task-on-other-os-via-containers:
+  test-install-build-artifact-task-on-other-os-via-containers:
     strategy:
       matrix:
         image:
@@ -55,7 +45,6 @@ jobs:
           - ubuntu:24.04
           # Need to pull in the repo GPG keys for sles
           #          - registry.suse.com/suse/sle15:15.6
-    needs: shellcheck
     runs-on: ubuntu-latest
     container: ${{ matrix.image }}
     steps:
@@ -67,9 +56,9 @@ jobs:
       - name: Run openvox-agent install task manually
         env:
           PT__installdir: ${{ github.workspace }}
-          PT_collection: openvox8
-          PT_apt_source: "https://apt.overlookinfratech.com"
-          PT_yum_source: "https://yum.overlookinfratech.com"
-        run: ./openvox_bootstrap/tasks/install_linux.sh
+          PT_version: "8.15.0"
+        run: ./openvox_bootstrap/tasks/install_build_artifact_linux.sh
       - name: Verify openvox-agent is installed
-        run: /opt/puppetlabs/bin/puppet --version | grep -E '[0-9]+\.[0-9]+'
+        shell: bash
+        run: |-
+          [[ "$(/opt/puppetlabs/bin/puppet --version)" = "8.15.0" ]]

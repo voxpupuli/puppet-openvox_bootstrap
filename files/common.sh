@@ -74,13 +74,14 @@ download() {
   fi
 }
 
-# Set platform and full_version variables by reaching out to the
-# puppetlabs-facts bash task as an executable.
+# Set platform, full_version and major_version variables by reaching
+# out to the puppetlabs-facts bash task as an executable.
 set_platform() {
   local facts="${installdir}/facts/tasks/bash.sh"
   if [ -e "${facts}" ]; then
     platform=$(bash "${facts}" platform)
     full_version=$(bash "${facts}" release)
+    major_version=${full_version%%.*}
   else
     fail "Unable to find the puppetlabs-facts bash task to determine platform at '${facts}'."
   fi
@@ -88,6 +89,8 @@ set_platform() {
   assigned 'platform'
   export full_version # quiets shellcheck SC2034
   assigned 'full_version'
+  export major_version # quiets shellcheck SC2034
+  assigned 'major_version'
 }
 
 # Set the OS family variable based on the platform.
@@ -141,4 +144,24 @@ set_package_type() {
   assigned 'package_type'
   export package_file_suffix # quiets shellcheck SC2034
   assigned 'package_file_suffix'
+}
+
+# Install a local rpm or deb package file.
+install_package_file() {
+  local _package_file="$1"
+  # If not set, use the file extension of the package file.
+  local _package_type="${2:-${_package_file##*.}}"
+
+  info "Installing release package '${_package_file}' of type '${_package_type}'"
+  case $_package_type in
+    rpm)
+      exec_and_capture rpm -Uvh "$_package_file"
+      ;;
+    deb)
+      exec_and_capture dpkg -i "$_package_file"
+      ;;
+    *)
+      fail "Unhandled package type: '${package_type}'"
+      ;;
+  esac
 }

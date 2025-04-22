@@ -41,52 +41,21 @@ set_collection_url() {
   set_repository "${family}"
   set_package_type "${family}"
 
-  if [ "${package_type}" == 'rpm' ]; then
-    major_version=${full_version%%.*}
-    assigned 'major_version'
-    package_name="${collection}-release-${family}-${major_version}.${package_file_suffix}"
-  else
-    package_name="${collection}-release-${family}${full_version}.${package_file_suffix}"
-  fi
-  package_url="${repository}/${package_name}"
-
-  assigned 'package_name'
-  assigned 'package_url'
-}
-
-# Download the release package to the tempdir.
-# Sets:
-#   local_release_package - the path to the downloaded release package.
-download_release_package() {
-  local _package_url="$1"
-  local _package_name="$2"
-
-  local_release_package="${tempdir}/${_package_name}"
-  assigned 'local_release_package'
-
-  download "${_package_url}" "${local_release_package}"
-}
-
-# Install the downloaded release package.
-# The release package has the repository metadata needed to install packages
-# from the collection using the platform package manager.
-install_release_package() {
-  local _package_type="$1"
-  local _package_file="$2"
-
-  info "Installing release package: ${_package_file}"
-  case $_package_type in
+  case "${package_type}" in
     rpm)
-      exec_and_capture rpm -Uvh "$_package_file"
+      package_name="${collection}-release-${family}-${major_version}.${package_file_suffix}"
       ;;
     deb)
-      exec_and_capture dpkg -i "$_package_file"
-      exec_and_capture apt update
+      package_name="${collection}-release-${family}${full_version}.${package_file_suffix}"
       ;;
     *)
       fail "Unhandled package type: '${package_type}'"
       ;;
   esac
+  package_url="${repository}/${package_name}"
+
+  assigned 'package_name'
+  assigned 'package_url'
 }
 
 # TODO add support for the version parameter.
@@ -109,13 +78,28 @@ install_package() {
   fi
 }
 
+# Installs the release package, and runs apt update if we are on a
+# Debian based platform.
+install_release_package() {
+  local _release_package="$1"
+  local _package_type="$2"
+
+  install_package_file "${_release_package}"
+  if [[ "${_package_type}" == "deb" ]]; then
+    exec_and_capture apt update
+  fi
+}
+
 # Get platform information
 set_platform
 # Set collection release package url based on platform
 set_collection_url "${platform}"
 # Download the release package to tempdir
-download_release_package "${package_url}" "${package_name}"
-# Install the release package
-install_release_package "${package_type}" "${local_release_package}"
+local_release_package="${tempdir}/${package_name}"
+download "${package_url}" "${local_release_package}"
+# Install the release package.
+# The release package has the repository metadata needed to install
+# packages from the collection using the platform package manager.
+install_release_package "${local_release_package}" "${package_type}"
 # Use the platform package manager to install openvox-agent
 install_package 'openvox-agent'

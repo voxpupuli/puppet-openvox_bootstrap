@@ -23,10 +23,10 @@ jobs:
     strategy:
       matrix:
         os-details:
-          - os: ubuntu-20.04
-            codename: focal
           - os: ubuntu-22.04
             codename: jammy
+    #      - os: ubuntu-24.04
+    #        codename: noble
     # Perforce hasn't yet released bolt on 24.04.
     runs-on: ${{ matrix.os-details.os }}
     needs: shellcheck

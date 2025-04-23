@@ -1,0 +1,48 @@
+---
+name: Prepare Container for Task
+description: "Checkouts module dependencies and ensures a wget is installed so that we can run the task scripts manually."
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: puppetlabs/puppetlabs-facts
+        path: facts
+    - name: Ensure wget is installed
+      shell: bash
+      env:
+        PT__installdir: ${{ github.workspace }}
+      run: |-
+        source openvox_bootstrap/files/common.sh
+
+        # Ensure wget is installed.
+        if exists 'apt'; then
+          exec_and_capture apt update
+        elif exists 'apt-get'; then
+          exec_and_capture apt-get update
+        elif exists 'dnf'; then
+          exec_and_capture dnf clean all
+        elif exists 'yum'; then
+          exec_and_capture yum clean all
+        elif exists 'zypper'; then
+          exec_and_capture zypper refresh
+        else
+          echo "No package manager found."
+          exit 1
+        fi
+        install_package wget
+
+        # Deal with missing package dependencies in the containers.
+        # ...possibly this should be moved into the
+        # install_build_artifact task scripts.
+        set_platform
+        if [[ "${platform}" == 'Rocky' ]]; then
+          # The Rocky9 container, at least, is missing openvox-agent's
+          # systemd dependency...
+          exec_and_capture dnf install -y systemd
+          if [[ "${major_version}" == '8' ]]; then
+            # ...and the Rocky8 container is missing findutils.
+            exec_and_capture dnf install -y findutils
+          fi
+        fi

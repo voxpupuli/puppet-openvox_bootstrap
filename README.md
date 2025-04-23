@@ -16,7 +16,7 @@ Assumes you have Bolt installed.
 
 ### openvox_boostrap::install
 
-Installs the openvox8 collection by default (Puppet:tm: 8).
+Installs the openvox8 collection by default (Puppet<sup>:tm:</sup> 8).
 
 ```sh
 bolt task run openvox_bootstrap::install \
@@ -28,7 +28,7 @@ bolt task run openvox_bootstrap::install \
 
 Bolt's
 [apply_prep](https://www.puppet.com/docs/bolt/latest/plan_functions#apply-prep)
-function ensures that the latest version of Puppet:tm: is installed on
+function ensures that the latest version of Puppet<sup>:tm:</sup> is installed on
 a node by calling the puppet_agent::install task if the agent is not
 detected on the node.
 

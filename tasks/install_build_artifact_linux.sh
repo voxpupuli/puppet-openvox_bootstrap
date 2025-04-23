@@ -8,9 +8,9 @@ installdir=$PT__installdir
 # shellcheck disable=SC2154
 version=${PT_version}
 # shellcheck disable=SC2154
-package=${PT_package}
+package=${PT_package:-'openvox-agent'}
 # shellcheck disable=SC2154
-artifacts_source=${PT_artifacts_source}
+artifacts_source=${PT_artifacts_source:-'https://s3.osuosl.org/openvox-artifacts'}
 
 # shellcheck source=files/common.sh
 source "${installdir}/openvox_bootstrap/files/common.sh"

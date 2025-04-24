@@ -2,7 +2,7 @@
   "description": "Installs the openvox-agent package.",
   "parameters": {
     "version": {
-      "description": "TODO The version of the openvox-agent package to install. Defaults to latest.",
+      "description": "The version of the openvox-agent package to install. Defaults to latest.",
       "type": "Optional[String]"
     },
     "collection": {

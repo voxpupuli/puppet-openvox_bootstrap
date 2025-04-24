@@ -72,4 +72,33 @@ jobs:
           PT_yum_source: "https://yum.overlookinfratech.com"
         run: ./openvox_bootstrap/tasks/install_linux.sh
       - name: Verify openvox-agent is installed
-        run: /opt/puppetlabs/bin/puppet --version | grep -E '[0-9]+\.[0-9]+'
+        run: /opt/puppetlabs/bin/puppet --version | grep -E '8\.[0-9]+'
+
+  test-install-version:
+    strategy:
+      matrix:
+        image:
+          - rockylinux:9
+          - fedora:41
+          - debian:12
+          - ubuntu:24.04
+          # Need to pull in the repo GPG keys for sles
+          #          - registry.suse.com/suse/sle15:15.6
+    needs: shellcheck
+    runs-on: ubuntu-latest
+    container: ${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: openvox_bootstrap
+      - id: prep
+        uses: ./openvox_bootstrap/.github/actions/container_task_prep
+      - name: Run openvox-agent install task manually
+        env:
+          PT__installdir: ${{ github.workspace }}
+          PT_version: "8.14.0"
+          PT_apt_source: "https://apt.overlookinfratech.com"
+          PT_yum_source: "https://yum.overlookinfratech.com"
+        run: ./openvox_bootstrap/tasks/install_linux.sh
+      - name: Verify openvox-agent is installed
+        run: /opt/puppetlabs/bin/puppet --version | grep '8.14.0'

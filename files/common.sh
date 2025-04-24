@@ -95,7 +95,12 @@ set_platform() {
 
 # Set the OS family variable based on the platform.
 set_family() {
-  local _platform="$1"
+  local _platform="${1:-${platform}}"
+
+  if [[ -z "${_platform}" ]]; then
+    set_platform
+    _platform="${platform}"
+  fi
 
   case $_platform in
     Amazon)
@@ -128,7 +133,12 @@ set_family() {
 #  package_type - rpm or deb or...
 #  package_file_suffix - the file extension for the release package name
 set_package_type() {
-  local _family="$1"
+  local _family="${1:-${family}}"
+
+  if [[ -z "${_family}" ]]; then
+    set_family "${platform}"
+    _family="${family}"
+  fi
 
   case $_family in
     amazon|fedora|el|sles)
@@ -166,21 +176,42 @@ install_package_file() {
   esac
 }
 
-# TODO add support for the version parameter.
+# Install a package using the system package manager.
 install_package() {
   local _package="$1"
+  local _version="$2"
+  local _family="${3:-${family}}"
 
-  info "Installing ${_package}"
+  info "Installing ${_package} ${_version}"
+
+  local _package_and_version
+  if [[ -n "${_version}" ]] && [[ "${_version}" != 'latest' ]]; then
+    if [[ -z "${_family}" ]]; then
+      set_family "${platform}"
+      _family="${family}"
+    fi
+    case $_family in
+      debian|ubuntu)
+        _package_and_version="${_package}=${_version}"
+        ;;
+      *)
+        _package_and_version="${_package}-${_version}"
+        ;;
+    esac
+  else
+    _package_and_version="${_package}"
+  fi
+
   if exists 'dnf'; then
-    exec_and_capture dnf install -y "$_package"
+    exec_and_capture dnf install -y "${_package_and_version}"
   elif exists 'yum'; then
-    exec_and_capture yum install -y "$_package"
+    exec_and_capture yum install -y "${_package_and_version}"
   elif exists 'zypper'; then
-    exec_and_capture zypper install -y "$_package"
+    exec_and_capture zypper install -y "${_package_and_version}"
   elif exists 'apt'; then
-    exec_and_capture apt install -y "$_package"
+    exec_and_capture apt install -y "${_package_and_version}"
   elif exists 'apt-get'; then
-    exec_and_capture apt-get install -y "$_package"
+    exec_and_capture apt-get install -y "${_package_and_version}"
   else
     fail "Unable to install ${_package}. Neither dnf, yum, zypper, apt nor apt-get are installed."
   fi

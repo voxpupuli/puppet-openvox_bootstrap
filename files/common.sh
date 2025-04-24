@@ -95,7 +95,12 @@ set_platform() {
 
 # Set the OS family variable based on the platform.
 set_family() {
-  local _platform="$1"
+  local _platform="${1:-${platform}}"
+
+  if [[ -z "${_platform}" ]]; then
+    set_platform
+    _platform="${platform}"
+  fi
 
   case $_platform in
     Amazon)
@@ -128,7 +133,12 @@ set_family() {
 #  package_type - rpm or deb or...
 #  package_file_suffix - the file extension for the release package name
 set_package_type() {
-  local _family="$1"
+  local _family="${1:-${family}}"
+
+  if [[ -z "${_family}" ]]; then
+    set_family "${platform}"
+    _family="${family}"
+  fi
 
   case $_family in
     amazon|fedora|el|sles)

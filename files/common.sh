@@ -102,23 +102,24 @@ set_family() {
     _platform="${platform}"
   fi
 
-  case $_platform in
-    Amazon)
+  # Downcase the platform so as to avoid case issues.
+  case ${_platform,,} in
+    amazon)
       family='amazon'
       ;;
-    RHEL|RedHat|CentOS|Scientific|OracleLinux|Rocky|AlmaLinux)
+    rhel|redhat|centos|scientific|oraclelinux|rocky|almalinux)
       family='el'
       ;;
-    Fedora)
+    fedora)
       family='fedora'
       ;;
-    SLES|Suse)
+    sles|suse)
       family='sles'
       ;;
-    Debian)
+    debian)
       family='debian'
       ;;
-    Ubuntu)
+    ubuntu)
       family='ubuntu'
       ;;
     *)

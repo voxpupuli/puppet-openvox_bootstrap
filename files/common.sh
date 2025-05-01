@@ -74,6 +74,28 @@ download() {
   fi
 }
 
+# Debian pre-release builds do not contain their version number
+# in /etc/os-release. They do contain codename. Openvox packages
+# are named with the version number. Hence this lookup, that
+# unfotunately needs to be updated with each new Debian release...
+translate_codename_to_version() {
+  local _codename="$1"
+
+  case "${_codename}" in
+    trixie)
+      echo '13'
+      ;;
+    forky)
+      echo '14'
+      ;;
+    *)
+      # VERSION_ID is set to 'n/a' in /etc/os-release, so
+      # if we don't know the codename, let's return the same value.
+      echo 'n/a'
+      ;;
+  esac
+}
+
 # Set platform, full_version and major_version variables by reaching
 # out to the puppetlabs-facts bash task as an executable.
 set_platform() {
@@ -81,6 +103,12 @@ set_platform() {
   if [ -e "${facts}" ]; then
     platform=$(bash "${facts}" platform)
     full_version=$(bash "${facts}" release)
+    if [[ "${full_version}" == "n/a" ]]; then
+      # Hit the facts json with blunt objects until the codename value
+      # pops out...
+      codename=$(bash "${facts}" | grep '"codename"' | cut -d':' -f2 | grep -oE '[^ "]+')
+      full_version=$(translate_codename_to_version "${codename}")
+    fi
     major_version=${full_version%%.*}
   else
     fail "Unable to find the puppetlabs-facts bash task to determine platform at '${facts}'."

@@ -44,20 +44,86 @@ exists() {
 
 # Log and execute a command in a subshell, capturing and echoing its
 # output before returning its exit status.
+#
+# Output is also captured in the variable EXEC_AND_CAPTURE_RESULT
+# for other functions to inspect.
 exec_and_capture() {
   local _cmd="$*"
 
   info "Executing: ${_cmd}"
 
-  local _result
   set +e
-  _result=$(${_cmd} 2>&1)
+  EXEC_AND_CAPTURE_RESULT=$(${_cmd} 2>&1)
   local _status=$?
   set -e
 
-  echo "${_result}"
+  echo "${EXEC_AND_CAPTURE_RESULT}"
   info "Status: ${_status}"
   return $_status
+}
+
+# If the passed command fails with output matching the given regex,
+# retry the command after delay up to given number of retries.
+#
+# Aborts retries if the command fails but output does not match the
+# given error regex.
+#
+# Returns the status of the last executed command.
+#
+# Args:
+#  $1 - retry count
+#  $2 - delay in seconds
+#  $3 - regex to match against command output
+#  Remaining args - command to execute
+with_retries_if() {
+  local _retries="$1"
+  local _delay="$2"
+  local _error_regex="$3"
+  shift 3
+
+  local _cmd="$*"
+  local _status
+
+  for ((i = 0; i < _retries; i++)); do
+    info "Attempt $((i + 1)) of $_retries: ${_cmd}"
+    exec_and_capture "${_cmd}"
+    _status=$?
+    if [[ "${_status}" == 0 ]]; then
+      break # command succeeded
+    else
+      if [[ "${EXEC_AND_CAPTURE_OUTPUT}" =~ ${_error_regex} ]]; then
+        info "Retrying in ${_delay} seconds..."
+        sleep "${_delay}"
+      else
+        info "Command failed but output did not match /${_error_regex}/. Aborting retries."
+        break
+      fi
+    fi
+  done
+
+  return "${_status}"
+}
+
+# Retries an rpm command if it fails with output that matches an rpm
+# lock error (rpm running in another process).
+#
+# All arguments given to the function are passed to the rpm command.
+#
+# NOTE: The higher level package managers (dnf, yum, apt, etc.)
+# already manage lock waits. This function is only used for the
+# specific case of manually installing the release package, which
+# can collide with other uses of rpm during vm initialization, for
+# example.
+rpm_with_retries() {
+  with_retries_if 5 5 'error.*rpm.*lock' rpm "$@"
+}
+
+# Varient of rpm_with_retries for dpkg.
+#
+# (I haven't seen a dpkg lock failure in CI, but the mechanism for
+# failure is the same.)
+dpkg_with_retries() {
+  with_retries_if 5 5 'error.*dpkg.*lock' dpkg "$@"
 }
 
 # Download the given url to the given local file path.
@@ -194,10 +260,10 @@ install_package_file() {
   info "Installing release package '${_package_file}' of type '${_package_type}'"
   case $_package_type in
     rpm)
-      exec_and_capture rpm -Uvh "$_package_file"
+      rpm_with_retries -Uvh "$_package_file"
       ;;
     deb)
-      exec_and_capture dpkg -i "$_package_file"
+      dpkg_with_retries -i "$_package_file"
       ;;
     *)
       fail "Unhandled package type: '${package_type}'"

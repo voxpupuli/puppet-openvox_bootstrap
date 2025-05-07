@@ -1,4 +1,9 @@
-## 0.1
+## 0.2.0 (2025-05-07)
+
+* retry logic for lock failures running rpm/dpkg during manual
+  install of openvox-release package
+
+## 0.1.0 (2025-05-01)
 
 * openvox_bootstrap::install task to install the openvox-agent
 * openvox_bootstrap::install_build_artifacts task to install the

@@ -45,21 +45,25 @@ exists() {
 # Log and execute a command in a subshell, capturing and echoing its
 # output before returning its exit status.
 #
-# Output is also captured in the variable EXEC_AND_CAPTURE_RESULT
-# for other functions to inspect.
+# Also captures output and status in the global variables:
+#
+# LAST_EXEC_AND_CAPTURE_OUTPUT
+# LAST_EXEC_AND_CAPTURE_STATUS
+#
+# so that the caller can inspect them as well.
 exec_and_capture() {
   local _cmd="$*"
 
   info "Executing: ${_cmd}"
 
   set +e
-  EXEC_AND_CAPTURE_RESULT=$(${_cmd} 2>&1)
-  local _status=$?
+  LAST_EXEC_AND_CAPTURE_OUTPUT=$(${_cmd} 2>&1)
+  LAST_EXEC_AND_CAPTURE_STATUS=$?
   set -e
 
-  echo "${EXEC_AND_CAPTURE_RESULT}"
-  info "Status: ${_status}"
-  return $_status
+  echo "${LAST_EXEC_AND_CAPTURE_OUTPUT}"
+  info "Status: ${LAST_EXEC_AND_CAPTURE_STATUS}"
+  return $LAST_EXEC_AND_CAPTURE_STATUS
 }
 
 # If the passed command fails with output matching the given regex,
@@ -82,19 +86,24 @@ with_retries_if() {
   shift 3
 
   local _cmd="$*"
+  local _result
   local _status
 
-  for ((i = 0; i < _retries; i++)); do
-    info "Attempt $((i + 1)) of $_retries: ${_cmd}"
-    exec_and_capture "${_cmd}"
-    _status=$?
-    if [[ "${_status}" == 0 ]]; then
+  for ((i = 1; i <= _retries; i++)); do
+    if [[ $i -gt 1 ]]; then
+      info "Retrying in ${_delay} seconds..."
+      sleep "${_delay}"
+    fi
+
+    info "Attempt ${i} of $_retries: ${_cmd}"
+
+    if exec_and_capture "${_cmd}"; then
+      _status=$LAST_EXEC_AND_CAPTURE_STATUS
       break # command succeeded
     else
-      if [[ "${EXEC_AND_CAPTURE_OUTPUT}" =~ ${_error_regex} ]]; then
-        info "Retrying in ${_delay} seconds..."
-        sleep "${_delay}"
-      else
+      _result="${LAST_EXEC_AND_CAPTURE_OUTPUT}"
+      _status=$LAST_EXEC_AND_CAPTURE_STATUS
+      if ! [[ "${_result}" =~ ${_error_regex} ]]; then
         info "Command failed but output did not match /${_error_regex}/. Aborting retries."
         break
       fi

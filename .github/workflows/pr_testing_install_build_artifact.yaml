@@ -31,6 +31,8 @@ jobs:
       - name: Verify openvox-agent is installed
         run: |-
           [[ "$(/opt/puppetlabs/bin/puppet --version)" = "8.15.0" ]]
+      - name: Verify idempotency
+        run: bolt task run openvox_bootstrap::install_build_artifact version=8.15.0 --targets localhost --run-as root
 
   test-install-build-artifact-task-on-other-os-via-containers:
     strategy:
@@ -64,3 +66,8 @@ jobs:
         shell: bash
         run: |-
           [[ "$(/opt/puppetlabs/bin/puppet --version)" = "8.15.0" ]]
+      - name: Verify idempotency
+        env:
+          PT__installdir: ${{ github.workspace }}
+          PT_version: "8.15.0"
+        run: ./openvox_bootstrap/tasks/install_build_artifact_linux.sh

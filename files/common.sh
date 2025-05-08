@@ -269,7 +269,7 @@ install_package_file() {
   info "Installing release package '${_package_file}' of type '${_package_type}'"
   case $_package_type in
     rpm)
-      rpm_with_retries -Uvh "$_package_file"
+      rpm_with_retries -Uvh --replacepkgs "$_package_file"
       ;;
     deb)
       dpkg_with_retries -i "$_package_file"

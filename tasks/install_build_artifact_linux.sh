@@ -10,7 +10,7 @@ version=${PT_version}
 # shellcheck disable=SC2154
 package=${PT_package:-'openvox-agent'}
 # shellcheck disable=SC2154
-artifacts_source=${PT_artifacts_source:-'https://s3.osuosl.org/openvox-artifacts'}
+artifacts_source=${PT_artifacts_source:-'https://artifacts.voxpupuli.org'}
 
 # shellcheck source=files/common.sh
 source "${installdir}/openvox_bootstrap/files/common.sh"
@@ -49,14 +49,14 @@ set_architecture() {
 #   package_url - the url to download the build artifact package
 #
 # Currently this is based on the structure of the package repository
-# at https://artifacts.overlookinfratech.com, which is a page
+# at https://artifacts.voxpupuli.org, which is a page
 # that provides a summary of links to artifacts contained in an S3
 # bucket hosted by Oregon State University Open Source Lab.
 #
 # Example rpm:
-# https://s3.osuosl.org/openvox-artifacts/openvox-agent/8.15.0/openvox-agent-8.15.0-1.el8.aarch64.rpm
+# https://artifacts.voxpupuli.org/openvox-agent/8.15.0/openvox-agent-8.15.0-1.el8.x86_64.rpm
 # Example deb:
-# https://s3.osuosl.org/openvox-artifacts/openvox-agent/8.15.0/openvox-agent_8.15.0-1+debian10_amd64.deb
+# https://artifacts.voxpupuli.org/openvox-agent/8.15.0/openvox-agent_8.15.0-1%2Bdebian12_amd64.deb
 set_package_url() {
   local _platform="$1"
   local _package="$2"

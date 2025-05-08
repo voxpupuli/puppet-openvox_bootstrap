@@ -10,9 +10,9 @@ version=${PT_version:-'latest'}
 # shellcheck disable=SC2154
 collection=${PT_collection:-'openvox8'}
 # shellcheck disable=SC2154
-yum_source=${PT_yum_source:-'https://yum.overlookinfratech.com'}
+yum_source=${PT_yum_source:-'https://yum.voxpupuli.org'}
 # shellcheck disable=SC2154
-apt_source=${PT_apt_source:-'https://apt.overlookinfratech.com'}
+apt_source=${PT_apt_source:-'https://apt.voxpupuli.org'}
 
 # shellcheck source=files/common.sh
 source "${installdir}/openvox_bootstrap/files/common.sh"

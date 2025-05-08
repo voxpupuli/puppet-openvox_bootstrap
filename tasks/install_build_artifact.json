@@ -13,7 +13,7 @@
     "artifacts_source": {
       "description": "URL to the build artifacts server.",
       "type": "String[1]",
-      "default": "https://s3.osuosl.org/openvox-artifacts"
+      "default": "https://artifacts.voxpupuli.org"
     }
   },
   "implementations": [

@@ -6,9 +6,10 @@ bootstrapping installation of the openvox-agent package.
 Provides some of the functionality of the [puppet_agent::install
 tasks](https://github.com/puppetlabs/puppetlabs-puppet_agent/tree/main?tab=readme-ov-file#puppet_agentinstall)
 for [openvox](https://voxpupuli.org/openvox/) packages from
-https://apt.overlookinfratech.com, https://yum.overlookinfratech.com.
+https://apt.voxpupuli.org, https://yum.voxpupuli.org.
 
-The puppet_agent module makes use of the Perforce repositories instead.
+The puppet_agent module makes use of the Perforce repositories and
+collections instead.
 
 ## Usage
 
@@ -53,7 +54,7 @@ plugin-hooks:
 
 The openvox_bootstrap::install_build_artifact task is a development
 task that can be used to install a build artifact package directly
-from the https://artifact.overlookinfratech.com repository for testing
+from the https://artifact.voxpupuli.org repository for testing
 prior to release.
 
 ```sh

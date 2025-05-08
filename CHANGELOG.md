@@ -1,3 +1,10 @@
+## 0.2.1 (2025-05-07)
+
+* (bug) fixed retry logic bypassed by failed command
+* (bug) fixed install tasks on redhat variants not being idempotent
+  for package file installation
+* (gha) added idempotency tests for install tasks
+
 ## 0.2.0 (2025-05-07)
 
 * retry logic for lock failures running rpm/dpkg during manual

@@ -1,6 +1,11 @@
 {
-  "description": "Installs the openvox-agent package.",
+  "description": "Installs an openvox package. By default, this will be the latest openvox-agent from the latest collection.",
   "parameters": {
+    "package": {
+      "description": "The name of the package to install.",
+      "type": "String[1]",
+      "default": "openvox-agent"
+    },
     "version": {
       "description": "The version of the openvox-agent package to install. Defaults to latest.",
       "type": "Optional[String]"

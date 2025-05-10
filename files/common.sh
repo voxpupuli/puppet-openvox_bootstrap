@@ -260,6 +260,29 @@ set_package_type() {
   assigned 'package_file_suffix'
 }
 
+# Construct and echo the full debian package version string.
+# Echoing for $() capture rather than setting a 'global' $var
+# since this could be called multiple times for different packages.
+get_deb_package_version() {
+  local _version="$1"
+  local _family="${2:-${family}}"
+  local _full_version="${3-${full_version}}"
+
+  # Need the full packaging version for deb.
+  # As an example, for openvox-agent 8.14.0 on ubuntu 24.04:
+  # 8.14.0-1+ubuntu24.04
+  if [[ "${_version}" =~ - ]]; then
+    # Caller's version already has a '-' seprator, so we
+    # should respect that they have probably supplied some
+    # full package version string.
+    _package_version="${_version}"
+  else
+    _package_version="${_version}-1+${_family}${_full_version}"
+  fi
+
+  echo -n "${_package_version}"
+}
+
 # Install a local rpm or deb package file.
 install_package_file() {
   local _package_file="$1"
@@ -281,10 +304,13 @@ install_package_file() {
 }
 
 # Install a package using the system package manager.
+# The version is optional, and if not provided, the latest version
+# available in the repository will be installed.
 install_package() {
   local _package="$1"
   local _version="$2"
   local _family="${3:-${family}}"
+  local _full_version="${4:-${full_version}}"
 
   info "Installing ${_package} ${_version}"
 
@@ -296,7 +322,13 @@ install_package() {
     fi
     case $_family in
       debian|ubuntu)
-        _package_and_version="${_package}=${_version}"
+        if [[ -z "${_full_version}" ]]; then
+          set_platform
+          _full_version="${full_version}"
+        fi
+        local _deb_package_version
+        _deb_package_version=$(get_deb_package_version "${_version}" "${_family}" "${_full_version}")
+        _package_and_version="${_package}=${_deb_package_version}"
         ;;
       *)
         _package_and_version="${_package}-${_version}"

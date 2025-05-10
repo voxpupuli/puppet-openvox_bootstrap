@@ -6,18 +6,24 @@
 
 ### Tasks
 
-* [`install`](#install): Installs the openvox-agent package.
+* [`install`](#install): Installs an openvox package. By default, this will be the latest openvox-agent from the latest collection.
 * [`install_build_artifact`](#install_build_artifact): Downloads and installs a package directly from openvox build artifact server. This can be used to help with testing builds prior to release. 
 
 ## Tasks
 
 ### <a name="install"></a>`install`
 
-Installs the openvox-agent package.
+Installs an openvox package. By default, this will be the latest openvox-agent from the latest collection.
 
 **Supports noop?** false
 
 #### Parameters
+
+##### `package`
+
+Data type: `String[1]`
+
+The name of the package to install.
 
 ##### `version`
 
@@ -51,17 +57,17 @@ Downloads and installs a package directly from openvox build artifact server. Th
 
 #### Parameters
 
-##### `version`
-
-Data type: `String[1]`
-
-The version of the package to install.
-
 ##### `package`
 
 Data type: `String[1]`
 
 The name of the package to install.
+
+##### `version`
+
+Data type: `String[1]`
+
+The version of the package to install.
 
 ##### `artifacts_source`
 

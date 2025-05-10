@@ -3,4 +3,6 @@
 .rerun.json
 .resource_types
 .task_cache.json
+.yardoc
+Gemfile.lock
 Puppetfile

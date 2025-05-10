@@ -26,6 +26,22 @@ jobs:
       - name: Run ShellCheck
         run: shellcheck -x tasks/*.sh files/*.sh
 
+  reference-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          # Not testing 3.4 yet, puppet fails to load here:
+          # bundler: failed to load command: puppet (/home/jpartlow/.rbenv/versions/3.4.3/lib/ruby/gems/3.4.0/bin/puppet)
+          # /home/jpartlow/.rbenv/versions/3.4.3/lib/ruby/gems/3.4.0/bundler/gems/puppet-6992edd1da38/lib/puppet/feature/base.rb:21:in '<top (required)>': Cannot determine basic system flavour (Puppet::Error)
+          ruby-version: '3.3'
+          bundler-cache: true
+      - name: Regenerate REFERENCE.md
+        run: bundle exec puppet strings generate --format markdown
+      - name: Check whether REFERENCE.md has uncommitted changes
+        run: git diff --exit-code REFERENCE.md
+
   test-install-task-on-ubuntu:
     strategy:
       matrix:

@@ -131,3 +131,67 @@ jobs:
         env:
           PT_version: "8.14.0"
         run: ./openvox_bootstrap/tasks/install_linux.sh
+
+  test-install-package:
+    strategy:
+      matrix:
+        image:
+          - rockylinux:9
+          # openvox-server not currently built for fedora
+          #          - fedora:41
+          - debian:12
+          - ubuntu:24.04
+          # Need to pull in the repo GPG keys for sles
+          #          - registry.suse.com/suse/sle15:15.6
+    needs: shellcheck
+    runs-on: ubuntu-latest
+    container: ${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: openvox_bootstrap
+      - id: prep
+        uses: ./openvox_bootstrap/.github/actions/container_task_prep
+      - name: Run openvox-agent install task manually
+        env:
+          PT_package: "openvox-server"
+        run: ./openvox_bootstrap/tasks/install_linux.sh
+      - name: Verify openvox-server is installed
+        run: /opt/puppetlabs/bin/puppetserver --version | grep -E '8\.[0-9]+'
+      - name: Verify idempotency
+        env:
+          PT_package: "openvox-server"
+        run: ./openvox_bootstrap/tasks/install_linux.sh
+
+  test-install-package-version:
+    strategy:
+      matrix:
+        image:
+          - rockylinux:9
+          # openvox-server not currently built for fedora
+          #- fedora:41
+          - debian:12
+          - ubuntu:24.04
+          # Need to pull in the repo GPG keys for sles
+          #          - registry.suse.com/suse/sle15:15.6
+    needs: shellcheck
+    runs-on: ubuntu-latest
+    container: ${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: openvox_bootstrap
+      - id: prep
+        uses: ./openvox_bootstrap/.github/actions/container_task_prep
+      - name: Run openvox-agent install task manually
+        env:
+          PT_package: "openvox-server"
+          PT_version: "8.8.0"
+        run: ./openvox_bootstrap/tasks/install_linux.sh
+      - name: Verify openvox-server is installed
+        run: /opt/puppetlabs/bin/puppetserver --version | grep '8.8.0'
+      - name: Verify idempotency
+        env:
+          PT_package: "openvox-server"
+          PT_version: "8.8.0"
+        run: ./openvox_bootstrap/tasks/install_linux.sh

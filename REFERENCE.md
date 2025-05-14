@@ -7,7 +7,7 @@
 ### Tasks
 
 * [`install`](#install): Installs an openvox package. By default, this will be the latest openvox-agent from the latest collection.
-* [`install_build_artifact`](#install_build_artifact): Downloads and installs a package directly from openvox build artifact server. This can be used to help with testing builds prior to release. 
+* [`install_build_artifact`](#install_build_artifact): Downloads and installs a package directly from the openvox build artifact server.
 
 ## Tasks
 
@@ -51,7 +51,7 @@ The yum source repository to retrieve rpm packages from.
 
 ### <a name="install_build_artifact"></a>`install_build_artifact`
 
-Downloads and installs a package directly from openvox build artifact server. This can be used to help with testing builds prior to release. (To install a released version, use the openvox_bootstrap::install task.)
+Downloads and installs a package directly from the openvox build artifact server.
 
 **Supports noop?** false
 

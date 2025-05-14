@@ -74,6 +74,10 @@ bolt task run openvox_bootstrap::install_build_artifact \
   --run-as root
 ```
 
+## Reference
+
+See [REFERENCE.md](./REFERENCE.md) for the generated reference doc.
+
 ## TODO
 
 * Windows support

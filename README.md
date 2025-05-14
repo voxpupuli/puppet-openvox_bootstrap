@@ -1,12 +1,11 @@
 # openvox_bootstrap
 
-[Bolt](https://www.puppet.com/docs/bolt/latest/bolt.html) module for
-bootstrapping installation of the openvox-agent package.
+[Bolt] module for bootstrapping installation of the [openvox]
+(Puppet<sup>:tm:</sup>) packages.
 
 Provides some of the functionality of the [puppet_agent::install
-tasks](https://github.com/puppetlabs/puppetlabs-puppet_agent/tree/main?tab=readme-ov-file#puppet_agentinstall)
-for [openvox](https://voxpupuli.org/openvox/) packages from
-https://apt.voxpupuli.org, https://yum.voxpupuli.org.
+tasks] for [openvox] packages from https://apt.voxpupuli.org,
+https://yum.voxpupuli.org.
 
 The puppet_agent module makes use of the Perforce repositories and
 collections instead.
@@ -17,28 +16,34 @@ Assumes you have Bolt installed.
 
 ### openvox_boostrap::install
 
-Installs the openvox8 collection by default (Puppet<sup>:tm:</sup> 8).
+Installs the platform appropriate openvox8 collection release package
+and the openvox-agent package by default (Puppet<sup>:tm:</sup> 8).
 
 ```sh
 bolt task run openvox_bootstrap::install \
   --targets <target> \
   --run-as root
 ```
+#### parameters
+
+By default the task will install the openvox-agent package, but this
+can be overridden by setting the `package` parameter to install
+openvox-server, openvoxdb or another package from the openvox
+collection.
+
+See the [install task](./REFERENCE.md#install) for details.
 
 #### Usage with Bolt apply_prep() function
 
-Bolt's
-[apply_prep](https://www.puppet.com/docs/bolt/latest/plan_functions#apply-prep)
-function ensures that the latest version of Puppet<sup>:tm:</sup> is installed on
-a node by calling the puppet_agent::install task if the agent is not
-detected on the node.
+Bolt's [apply_prep] function ensures that the latest version of
+Puppet<sup>:tm:</sup> is installed on a node by calling the
+`puppet_agent::install` task if the agent is not detected on the node.
 
-The openvox_bootstrap::install task can be used in its place to
+The `openvox_bootstrap::install` task can be used in its place to
 instead ensure that openvox-agent is installed.
 
-The apply_prep() function relies on Bolt's
-[puppet_library](https://www.puppet.com/docs/bolt/latest/using_plugins#puppet-library-plugins)
-plugin configuration.
+The apply_prep() function relies on Bolt's [puppet_library] plugin
+configuration.
 
 To use openvox_bootstrap instead, configure your bolt_project.yaml
 with:
@@ -57,11 +62,21 @@ task that can be used to install a build artifact package directly
 from the https://artifact.voxpupuli.org repository for testing
 prior to release.
 
+Minimally, you must supply the `version` parameter, but generally you
+would also supply `package` unless you are installing the
+openvox-agent package.
+
+See [task ref](./REFERENCE.md#install_build_artifact) for details.
+
 ```sh
-bolt task run openvox_bootstrap::install \
-  --targets <target> \
+bolt task run openvox_bootstrap::install_build_artifact \
+  --targets <target> --version=8.17.0 \
   --run-as root
 ```
+
+## Reference
+
+See [REFERENCE.md](./REFERENCE.md) for the generated reference doc.
 
 ## TODO
 
@@ -85,3 +100,9 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+[bolt]: https://puppet.com/docs/bolt/latest/bolt.html
+[openvox]: https://voxpupuli.org/openvox/
+[puppet_agent::install tasks]: https://github.com/puppetlabs/puppetlabs-puppet_agent/tree/main?tab=readme-ov-file#puppet_agentinstall
+[apply_prep]: https://www.puppet.com/docs/bolt/latest/plan_functions#apply-prep
+[puppet_library]: https://www.puppet.com/docs/bolt/latest/using_plugins#puppet-library-plugins

@@ -62,22 +62,21 @@ set_package_url() {
   local _package="$2"
   local _version="$3"
 
-  set_family "${_platform}"
-  set_package_type "${family}"
-  set_architecture "${family}"
+  set_package_type "${os_family}"
+  set_architecture "${os_family}"
 
   case "${package_type}" in
     rpm)
       # Account for a fedora naming quirk in the build artifacts.
-      if [[ "${family}" == "fedora" ]]; then
-        _family="fc"
+      if [[ "${os_family}" == "fedora" ]]; then
+        _os_family="fc"
       else
-        _family="${family}"
+        _os_family="${os_family}"
       fi
-      package_name="${_package}-${_version}-1.${_family}${major_version}.${cpu_arch}.${package_type}"
+      package_name="${_package}-${_version}-1.${_os_family}${os_major_version}.${cpu_arch}.${package_type}"
       ;;
     deb)
-      package_name="${_package}_${_version}-1%2B${family}${full_version}_${cpu_arch}.${package_type}"
+      package_name="${_package}_${_version}-1%2B${os_family}${os_full_version}_${cpu_arch}.${package_type}"
       ;;
     *)
       fail "Unhandled package type: '${package_type}'"
@@ -90,7 +89,7 @@ set_package_url() {
 }
 
 # Get platform information
-set_platform
+set_platform_globals
 # Set url to build artifacts package based on platform
 set_package_url "${platform}" "${package}" "${version}"
 # Download the build artifacts package to the tempdir.

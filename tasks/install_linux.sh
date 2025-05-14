@@ -6,6 +6,8 @@ set -e
 # shellcheck disable=SC2154
 installdir=$PT__installdir
 # shellcheck disable=SC2154
+package=${PT_package:-'openvox-agent'}
+# shellcheck disable=SC2154
 version=${PT_version:-'latest'}
 # shellcheck disable=SC2154
 collection=${PT_collection:-'openvox8'}
@@ -39,16 +41,15 @@ set_repository() {
 set_collection_url() {
   local _platform="$1"
 
-  set_family "${_platform}"
-  set_repository "${family}"
-  set_package_type "${family}"
+  set_repository "${os_family}"
+  set_package_type "${os_family}"
 
   case "${package_type}" in
     rpm)
-      package_name="${collection}-release-${family}-${major_version}.${package_file_suffix}"
+      package_name="${collection}-release-${os_family}-${os_major_version}.${package_file_suffix}"
       ;;
     deb)
-      package_name="${collection}-release-${family}${full_version}.${package_file_suffix}"
+      package_name="${collection}-release-${os_family}${os_full_version}.${package_file_suffix}"
       ;;
     *)
       fail "Unhandled package type: '${package_type}'"
@@ -60,55 +61,17 @@ set_collection_url() {
   assigned 'package_url'
 }
 
-# Installs the release package, and runs apt update if we are on a
-# Debian based platform.
+# Installs the release package, and refreshes the package manager's
+# cache.
 install_release_package() {
   local _release_package="$1"
-  local _package_type="$2"
 
   install_package_file "${_release_package}"
-  if [[ "${_package_type}" == "deb" ]]; then
-    exec_and_capture apt update
-  fi
-}
-
-# Installs the openvox-agent package using the system package manager.
-# The version is optional, and if not provided, the latest version
-# available in the repository will be installed.
-install_openvox_agent() {
-  local _version="$1"
-  local _family="$2"
-  local _full_version="$3"
-
-  local _package_version
-  if [[ -n "${_version}" ]] && [[ "${_version}" != 'latest' ]]; then
-    case $_family in
-      debian|ubuntu)
-        # Need the full packaging version for deb.
-        # As an example, for openvox-agent 8.14.0 on ubuntu 24.04:
-        # 8.14.0-1+ubuntu24.04
-        if [[ "${_version}" =~ - ]]; then
-          # Caller's version already has a '-' seprator, so we
-          # should respect that they have probably supplied some
-          # full package version string.
-          _package_version="${_version}"
-        else
-          _package_version="${_version}-1+${_family}${_full_version}"
-        fi
-        ;;
-      *)
-        # rpm packages should be fine so long as the shorter form
-        # matches uniquely.
-        _package_version="${_version}"
-        ;;
-    esac
-  fi
-
-  install_package openvox-agent "${_package_version}" "${_family}"
+  refresh_package_cache
 }
 
 # Get platform information
-set_platform
+set_platform_globals
 # Set collection release package url based on platform
 set_collection_url "${platform}"
 # Download the release package to tempdir
@@ -117,6 +80,6 @@ download "${package_url}" "${local_release_package}"
 # Install the release package.
 # The release package has the repository metadata needed to install
 # packages from the collection using the platform package manager.
-install_release_package "${local_release_package}" "${package_type}"
+install_release_package "${local_release_package}"
 # Use the platform package manager to install openvox-agent
-install_openvox_agent "${version}" "${family}" "${full_version}"
+install_package "${package}" "${version}" "${os_family}" "${os_full_version}"

@@ -1,14 +1,14 @@
 {
-  "description": "Downloads and installs a package directly from openvox build artifact server. This can be used to help with testing builds prior to release. (To install a released version, use the openvox_bootstrap::install task.)",
+  "description": "Downloads and installs a package directly from the openvox build artifact server.",
   "parameters": {
-    "version": {
-      "description": "The version of the package to install.",
-      "type": "String[1]"
-    },
     "package": {
       "description": "The name of the package to install.",
       "type": "String[1]",
       "default": "openvox-agent"
+    },
+    "version": {
+      "description": "The version of the package to install.",
+      "type": "String[1]"
     },
     "artifacts_source": {
       "description": "URL to the build artifacts server.",

@@ -41,16 +41,15 @@ set_repository() {
 set_collection_url() {
   local _platform="$1"
 
-  set_family "${_platform}"
-  set_repository "${family}"
-  set_package_type "${family}"
+  set_repository "${os_family}"
+  set_package_type "${os_family}"
 
   case "${package_type}" in
     rpm)
-      package_name="${collection}-release-${family}-${major_version}.${package_file_suffix}"
+      package_name="${collection}-release-${os_family}-${os_major_version}.${package_file_suffix}"
       ;;
     deb)
-      package_name="${collection}-release-${family}${full_version}.${package_file_suffix}"
+      package_name="${collection}-release-${os_family}${os_full_version}.${package_file_suffix}"
       ;;
     *)
       fail "Unhandled package type: '${package_type}'"
@@ -75,7 +74,7 @@ install_release_package() {
 }
 
 # Get platform information
-set_platform
+set_platform_globals
 # Set collection release package url based on platform
 set_collection_url "${platform}"
 # Download the release package to tempdir
@@ -86,4 +85,4 @@ download "${package_url}" "${local_release_package}"
 # packages from the collection using the platform package manager.
 install_release_package "${local_release_package}" "${package_type}"
 # Use the platform package manager to install openvox-agent
-install_package "${package}" "${version}" "${family}" "${full_version}"
+install_package "${package}" "${version}" "${os_family}" "${os_full_version}"

@@ -171,80 +171,81 @@ translate_codename_to_version() {
   esac
 }
 
-# Set platform, full_version and major_version variables by reaching
-# out to the puppetlabs-facts bash task as an executable.
-set_platform() {
-  local facts="${installdir}/facts/tasks/bash.sh"
-  if [ -e "${facts}" ]; then
-    platform=$(bash "${facts}" platform)
-    full_version=$(bash "${facts}" release)
-    if [[ "${full_version}" == "n/a" ]]; then
-      # Hit the facts json with blunt objects until the codename value
-      # pops out...
-      codename=$(bash "${facts}" | grep '"codename"' | cut -d':' -f2 | grep -oE '[^ "]+')
-      full_version=$(translate_codename_to_version "${codename}")
-    fi
-    major_version=${full_version%%.*}
-  else
-    fail "Unable to find the puppetlabs-facts bash task to determine platform at '${facts}'."
-  fi
-  export platform # quiets shellcheck SC2034
-  assigned 'platform'
-  export full_version # quiets shellcheck SC2034
-  assigned 'full_version'
-  export major_version # quiets shellcheck SC2034
-  assigned 'major_version'
-}
-
-# Set the OS family variable based on the platform.
-set_family() {
+# Set the $os_family variable based on the platform.
+set_os_family() {
   local _platform="${1:-${platform}}"
-
-  if [[ -z "${_platform}" ]]; then
-    set_platform
-    _platform="${platform}"
-  fi
 
   # Downcase the platform so as to avoid case issues.
   case ${_platform,,} in
     amazon)
-      family='amazon'
+      os_family='amazon'
       ;;
     rhel|redhat|centos|scientific|oraclelinux|rocky|almalinux)
-      family='el'
+      os_family='el'
       ;;
     fedora)
-      family='fedora'
+      os_family='fedora'
       ;;
     sles|suse)
-      family='sles'
+      os_family='sles'
       ;;
     debian)
-      family='debian'
+      os_family='debian'
       ;;
     ubuntu)
-      family='ubuntu'
+      os_family='ubuntu'
       ;;
     *)
       fail "Unhandled platform: '${_platform}'"
       ;;
   esac
-  export family # quiets shellcheck SC2034
-  assigned 'family'
+  export os_family # quiets shellcheck SC2034
+  assigned 'os_family'
 }
 
-# Based on platform family set:
+# Read local OS facts by reaching out to the puppetlabs-facts bash
+# task as an executable, then set these globals:
+#   $platform
+#   $os_full_version
+#   $os_major_version
+#   $os_family
+set_platform_globals() {
+  local facts="${installdir}/facts/tasks/bash.sh"
+  if [ -e "${facts}" ]; then
+    platform=$(bash "${facts}" platform)
+    os_full_version=$(bash "${facts}" release)
+    if [[ "${os_full_version}" == "n/a" ]]; then
+      # Hit the facts json with blunt objects until the codename value
+      # pops out...
+      codename=$(bash "${facts}" | grep '"codename"' | cut -d':' -f2 | grep -oE '[^ "]+')
+      os_full_version=$(translate_codename_to_version "${codename}")
+    fi
+    os_major_version=${os_full_version%%.*}
+  else
+    fail "Unable to find the puppetlabs-facts bash task to determine platform at '${facts}'."
+  fi
+  export platform # quiets shellcheck SC2034
+  assigned 'platform'
+  export os_full_version # quiets shellcheck SC2034
+  assigned 'os_full_version'
+  export os_major_version # quiets shellcheck SC2034
+  assigned 'os_major_version'
+
+  set_os_family "${platform}"
+}
+
+# Based on platform os_family set:
 #  package_type - rpm or deb or...
 #  package_file_suffix - the file extension for the release package name
 set_package_type() {
-  local _family="${1:-${family}}"
+  local _os_family="${1:-${os_family}}"
 
-  if [[ -z "${_family}" ]]; then
-    set_family "${platform}"
-    _family="${family}"
+  if [[ -z "${_os_family}" ]]; then
+    set_platform_globals
+    _os_family="${os_family}"
   fi
 
-  case $_family in
+  case $_os_family in
     amazon|fedora|el|sles)
       package_type='rpm'
       package_file_suffix='noarch.rpm'
@@ -265,8 +266,8 @@ set_package_type() {
 # since this could be called multiple times for different packages.
 get_deb_package_version() {
   local _version="$1"
-  local _family="${2:-${family}}"
-  local _full_version="${3-${full_version}}"
+  local _os_family="${2:-${os_family}}"
+  local _os_full_version="${3-${os_full_version}}"
 
   # Need the full packaging version for deb.
   # As an example, for openvox-agent 8.14.0 on ubuntu 24.04:
@@ -277,7 +278,7 @@ get_deb_package_version() {
     # full package version string.
     _package_version="${_version}"
   else
-    _package_version="${_version}-1+${_family}${_full_version}"
+    _package_version="${_version}-1+${_os_family}${_os_full_version}"
   fi
 
   echo -n "${_package_version}"
@@ -309,25 +310,22 @@ install_package_file() {
 install_package() {
   local _package="$1"
   local _version="$2"
-  local _family="${3:-${family}}"
-  local _full_version="${4:-${full_version}}"
+  local _os_family="${3:-${os_family}}"
+  local _os_full_version="${4:-${os_full_version}}"
 
   info "Installing ${_package} ${_version}"
 
   local _package_and_version
   if [[ -n "${_version}" ]] && [[ "${_version}" != 'latest' ]]; then
-    if [[ -z "${_family}" ]]; then
-      set_family "${platform}"
-      _family="${family}"
+    if [[ -z "${_os_family}" ]] || [[ -z "${_os_full_version}" ]]; then
+      set_platform_globals
+      _os_family="${os_family}"
+      _os_full_version="${os_full_version}"
     fi
-    case $_family in
+    case $_os_family in
       debian|ubuntu)
-        if [[ -z "${_full_version}" ]]; then
-          set_platform
-          _full_version="${full_version}"
-        fi
         local _deb_package_version
-        _deb_package_version=$(get_deb_package_version "${_version}" "${_family}" "${_full_version}")
+        _deb_package_version=$(get_deb_package_version "${_version}" "${_os_family}" "${_os_full_version}")
         _package_and_version="${_package}=${_deb_package_version}"
         ;;
       *)

@@ -36,12 +36,12 @@ runs:
         # Deal with missing package dependencies in the containers.
         # ...possibly this should be moved into the
         # install_build_artifact task scripts.
-        set_platform
+        set_platform_globals
         if [[ "${platform}" == 'Rocky' ]]; then
           # The Rocky9 container, at least, is missing openvox-agent's
           # systemd dependency...
           exec_and_capture dnf install -y systemd
-          if [[ "${major_version}" == '8' ]]; then
+          if [[ "${os_major_version}" == '8' ]]; then
             # ...and the Rocky8 container is missing findutils.
             exec_and_capture dnf install -y findutils
           fi

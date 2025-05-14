@@ -61,16 +61,13 @@ set_collection_url() {
   assigned 'package_url'
 }
 
-# Installs the release package, and runs apt update if we are on a
-# Debian based platform.
+# Installs the release package, and refreshes the package manager's
+# cache.
 install_release_package() {
   local _release_package="$1"
-  local _package_type="$2"
 
   install_package_file "${_release_package}"
-  if [[ "${_package_type}" == "deb" ]]; then
-    exec_and_capture apt update
-  fi
+  refresh_package_cache
 }
 
 # Get platform information
@@ -83,6 +80,6 @@ download "${package_url}" "${local_release_package}"
 # Install the release package.
 # The release package has the repository metadata needed to install
 # packages from the collection using the platform package manager.
-install_release_package "${local_release_package}" "${package_type}"
+install_release_package "${local_release_package}"
 # Use the platform package manager to install openvox-agent
 install_package "${package}" "${version}" "${os_family}" "${os_full_version}"

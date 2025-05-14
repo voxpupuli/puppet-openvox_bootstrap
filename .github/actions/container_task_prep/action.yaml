@@ -17,20 +17,7 @@ runs:
         source openvox_bootstrap/files/common.sh
 
         # Ensure wget is installed.
-        if exists 'apt'; then
-          exec_and_capture apt update
-        elif exists 'apt-get'; then
-          exec_and_capture apt-get update
-        elif exists 'dnf'; then
-          exec_and_capture dnf clean all
-        elif exists 'yum'; then
-          exec_and_capture yum clean all
-        elif exists 'zypper'; then
-          exec_and_capture zypper refresh
-        else
-          echo "No package manager found."
-          exit 1
-        fi
+        refresh_package_cache
         install_package wget
 
         # Deal with missing package dependencies in the containers.

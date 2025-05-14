@@ -350,3 +350,21 @@ install_package() {
     fail "Unable to install ${_package}. Neither dnf, yum, zypper, apt nor apt-get are installed."
   fi
 }
+
+# Update the package manager cache.
+refresh_package_cache() {
+  if exists 'apt'; then
+    exec_and_capture apt update
+  elif exists 'apt-get'; then
+    exec_and_capture apt-get update
+  elif exists 'dnf'; then
+    exec_and_capture dnf clean all
+  elif exists 'yum'; then
+    exec_and_capture yum clean all
+  elif exists 'zypper'; then
+    exec_and_capture zypper refresh
+  else
+    echo "No package manager found."
+    exit 1
+  fi
+}

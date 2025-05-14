@@ -1,3 +1,10 @@
+## 0.3.0 (2025-05-14)
+
+* (tasks) Add package param to install task
+* (maint) Provide workaround to avoid out of date puppet gem
+* (doc) Add and test for current REFERENCE.md using puppet-strings
+* (maint) Update source urls to voxpupuli.org
+
 ## 0.2.1 (2025-05-07)
 
 * (bug) fixed retry logic bypassed by failed command

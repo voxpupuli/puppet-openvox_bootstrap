@@ -1,13 +1,13 @@
 {
-  "name": "openvox_bootstrap",
-  "version": "0.1.0",
-  "summary": "Bootstrap installation of the OpenVox agent.",
-  "description": "A Bolt project to bootstrap the installation of the OpenVox agent.",
+  "name": "puppet-openvox_bootstrap",
+  "version": "0.3.0",
+  "summary": "Bootstrap installation of OpenVox packages.",
+  "description": "A Bolt project to bootstrap the installation of OpenVox packages.",
   "author": "Josh Partlow",
   "license": "AGPL-3.0",
-  "source": "https://github.com/jpartlow/openvox_bootstrap",
-  "project_page": "https://github.com/jpartlow/openvox_bootstrap",
-  "issues_url": "https://github.com/jpartlow/openvox_bootstrap/issues",
+  "source": "https://github.com/voxpupuli/puppet-openvox_bootstrap",
+  "project_page": "https://github.com/voxpupuli/puppet-openvox_bootstrap",
+  "issues_url": "https://github.com/voxpupuli/puppet-openvox_bootstrap/issues",
   "dependencies": [
     {
       "name": "puppetlabs-facts",

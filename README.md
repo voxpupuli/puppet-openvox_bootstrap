@@ -87,8 +87,13 @@ See [REFERENCE.md](./REFERENCE.md) for the generated reference doc.
 ## History
 
 This module started as jpartlow/openvox_bootstrap and has been renamed
-puppet-openvox_bootstrap in prepration for being moved over into the
-voxpupuli org.
+puppet-openvox_bootstrap and moved over to the voxpupuli organization.
+
+It was only out and about as jpartlow/openvox_bootstrap for a few
+months, but if you have a reference to jpartlow/openvox_bootstrap or
+jpartlow/puppet-openvox_bootstrap, please update to
+voxpupuli/puppet-openvox_bootstrap, as my fork will be out of sync
+and/or experimental going forward.
 
 ## License
 

@@ -84,6 +84,12 @@ See [REFERENCE.md](./REFERENCE.md) for the generated reference doc.
 * Sles support (handle repository gpg key)
 * MacOS support
 
+## History
+
+This module started as jpartlow/openvox_bootstrap and has been renamed
+puppet-openvox_bootstrap in prepration for being moved over into the
+voxpupuli org.
+
 ## License
 
 Copyright (C) 2025 Joshua Partlow

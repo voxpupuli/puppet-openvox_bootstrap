@@ -34,6 +34,21 @@ module OBRspecFacts
     },
   }.freeze
 
+  ROCKY_9 = {
+    os: {
+      name: 'Rocky',
+      distro: {
+        codename: 'Blue Onyx',
+      },
+      release: {
+        full: '9.5',
+        major: '9',
+        minor: '5',
+      },
+      family: 'RedHat',
+    },
+  }.freeze
+
   # This is a placeholder for an OS that openvox_bootstrap doesn't
   # know about yet, for testing failure cases.
   UNKNOWN = {
@@ -52,8 +67,9 @@ module OBRspecFacts
   }.freeze
 
   FACTS = {
-    ubuntu2404: UBUNTU_2404,
     debian13: DEBIAN_13,
+    rocky9: ROCKY_9,
+    ubuntu2404: UBUNTU_2404,
     unknown: UNKNOWN,
   }.freeze
 

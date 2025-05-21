@@ -315,13 +315,14 @@ install_package() {
 
   info "Installing ${_package} ${_version}"
 
+  if [[ -z "${_os_family}" ]] || [[ -z "${_os_full_version}" ]]; then
+    set_platform_globals
+    _os_family="${os_family}"
+    _os_full_version="${os_full_version}"
+  fi
+
   local _package_and_version
   if [[ -n "${_version}" ]] && [[ "${_version}" != 'latest' ]]; then
-    if [[ -z "${_os_family}" ]] || [[ -z "${_os_full_version}" ]]; then
-      set_platform_globals
-      _os_family="${os_family}"
-      _os_full_version="${os_full_version}"
-    fi
     case $_os_family in
       debian|ubuntu)
         local _deb_package_version
@@ -336,19 +337,28 @@ install_package() {
     _package_and_version="${_package}"
   fi
 
-  if exists 'dnf'; then
-    exec_and_capture dnf install -y "${_package_and_version}"
-  elif exists 'yum'; then
-    exec_and_capture yum install -y "${_package_and_version}"
-  elif exists 'zypper'; then
-    exec_and_capture zypper install -y "${_package_and_version}"
-  elif exists 'apt'; then
-    exec_and_capture apt install -y "${_package_and_version}"
-  elif exists 'apt-get'; then
-    exec_and_capture apt-get install -y "${_package_and_version}"
-  else
-    fail "Unable to install ${_package}. Neither dnf, yum, zypper, apt nor apt-get are installed."
-  fi
+  case ${_os_family} in
+    debian|ubuntu)
+      if exists 'apt'; then
+        exec_and_capture apt install -y "${_package_and_version}"
+      elif exists 'apt-get'; then
+        exec_and_capture apt-get install -y "${_package_and_version}"
+      else
+        fail "Unable to install ${_package}. Neither apt nor apt-get are installed."
+      fi
+      ;;
+    *)
+      if exists 'dnf'; then
+        exec_and_capture dnf install -y "${_package_and_version}"
+      elif exists 'yum'; then
+        exec_and_capture yum install -y "${_package_and_version}"
+      elif exists 'zypper'; then
+        exec_and_capture zypper install -y "${_package_and_version}"
+      else
+        fail "Unable to install ${_package}. Neither dnf, yum nor zypper are installed."
+      fi
+      ;;
+  esac
 }
 
 # Update the package manager cache.

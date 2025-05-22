@@ -329,13 +329,13 @@ describe 'files/common.sh' do
 
       before do
         mock_facts_task_bash_sh(os)
-        allow_script.to receive_command(:apt).and_exec('echo "apt given: $*"')
+        allow_script.to receive_command('apt-get').and_exec('echo "apt-get given: $*"')
       end
 
       it 'installs a package' do
         output, status = test('install_package foo')
 
-        expect(output).to include('apt given: install -y foo')
+        expect(output).to include('apt-get given: install -y foo')
         expect(status.success?).to be(true)
       end
 
@@ -343,36 +343,36 @@ describe 'files/common.sh' do
         output, status = test('install_package foo 1.2.3')
 
         expect(status.success?).to be(true)
-        expect(output).to include('apt given: install -y foo=1.2.3-1+ubuntu24.04')
+        expect(output).to include('apt-get given: install -y foo=1.2.3-1+ubuntu24.04')
       end
 
       it 'installs a deb with full package version given' do
         output, status = test('install_package foo 1.2.3-1something')
 
         expect(status.success?).to be(true)
-        expect(output).to include('apt given: install -y foo=1.2.3-1something')
+        expect(output).to include('apt-get given: install -y foo=1.2.3-1something')
       end
 
       it 'fails if package manager fails' do
-        allow_script.to receive_command(:apt).and_exec(<<~EOF)
-          echo 'apt failed'
+        allow_script.to receive_command('apt-get').and_exec(<<~EOF)
+          echo 'apt-get failed'
           return 1
         EOF
 
         output, status = test('install_package doesnotexist')
 
         expect(status.success?).to be(false)
-        expect(output).to include('apt failed')
+        expect(output).to include('apt-get failed')
       end
 
       it 'falls back to apt-get' do
-        behave_as_if_command_does_not_exist(:apt)
-        allow_script.to receive_command('apt-get').and_exec('echo "apt-get given: $*"')
+        behave_as_if_command_does_not_exist('apt-get')
+        allow_script.to receive_command(:apt).and_exec('echo "apt given: $*"')
 
         output, status = test('install_package foo')
 
         expect(status.success?).to be(true)
-        expect(output).to include('apt-get given: install -y foo')
+        expect(output).to include('apt given: install -y foo')
       end
 
       it 'fails if neither apt nor apt-get are available' do

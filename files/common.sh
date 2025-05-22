@@ -339,10 +339,10 @@ install_package() {
 
   case ${_os_family} in
     debian|ubuntu)
-      if exists 'apt'; then
-        exec_and_capture apt install -y "${_package_and_version}"
-      elif exists 'apt-get'; then
+      if exists 'apt-get'; then
         exec_and_capture apt-get install -y "${_package_and_version}"
+      elif exists 'apt'; then
+        exec_and_capture apt install -y "${_package_and_version}"
       else
         fail "Unable to install ${_package}. Neither apt nor apt-get are installed."
       fi
@@ -363,10 +363,10 @@ install_package() {
 
 # Update the package manager cache.
 refresh_package_cache() {
-  if exists 'apt'; then
-    exec_and_capture apt update
-  elif exists 'apt-get'; then
+  if exists 'apt-get'; then
     exec_and_capture apt-get update
+  elif exists 'apt'; then
+    exec_and_capture apt update
   elif exists 'dnf'; then
     exec_and_capture dnf clean all
   elif exists 'yum'; then

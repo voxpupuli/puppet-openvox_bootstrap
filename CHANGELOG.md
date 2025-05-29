@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
+## [v0.3.2](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v0.3.2) (2025-05-29)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/v0.3.1...v0.3.2)
+
+**Merged pull requests:**
+
+- CI: Cleanup redundant jobs [\#18](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/18) ([bastelfreak](https://github.com/bastelfreak))
+- modulesync 9.7.0 [\#17](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/17) ([bastelfreak](https://github.com/bastelfreak))
+
 ## [v0.3.1](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v0.3.1) (2025-05-29)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/0.3.0...v0.3.1)

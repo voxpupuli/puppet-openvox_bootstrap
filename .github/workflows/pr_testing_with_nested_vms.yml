@@ -63,6 +63,4 @@ jobs:
           bolt task run openvox_bootstrap::install --inventory kvm_automation_tooling/terraform/instances/inventory.test.yaml --targets test-agent-1
       - name: Verify openvox-agent is installed
         run: |-
-          bolt command run \
-            --inventory kvm_automation_tooling/terraform/instances/inventory.test.yaml --targets test-agent-1 \
-            '[[ "$(/opt/puppetlabs/bin/puppet --version)" =~ [0-9]+\.[0-9]+\.[0-9]+ ]]'
+          bolt task run openvox_bootstrap::check version=8 test=gt --inventory kvm_automation_tooling/terraform/instances/inventory.test.yaml --targets test-agent-1

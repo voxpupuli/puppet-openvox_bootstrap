@@ -143,7 +143,7 @@ download() {
   if exists 'wget'; then
     exec_and_capture wget -O "${_file}" "${_url}"
   elif exists 'curl'; then
-    exec_and_capture curl --fail-with-body -sSL -o "${_file}" "${_url}"
+    exec_and_capture curl --fail -sSL -o "${_file}" "${_url}"
   else
     fail "Unable to download ${_url}. Neither wget nor curl are installed."
   fi

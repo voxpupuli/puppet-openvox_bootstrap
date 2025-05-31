@@ -13,8 +13,6 @@ env:
   # Environment variables needed when running the task install scripts
   # manually.
   PT__installdir: ${{ github.workspace }}
-  PT_apt_source: "https://apt.voxpupuli.org"
-  PT_yum_source: "https://yum.voxpupuli.org"
 
 jobs:
   shellcheck:

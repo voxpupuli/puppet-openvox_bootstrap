@@ -6,10 +6,31 @@
 
 ### Tasks
 
+* [`check`](#check): Check whether a Puppet(tm) implementation is installed. Optionally checks the version.
 * [`install`](#install): Installs an openvox package. By default, this will be the latest openvox-agent from the latest collection.
 * [`install_build_artifact`](#install_build_artifact): Downloads and installs a package directly from the openvox build artifact server.
 
 ## Tasks
+
+### <a name="check"></a>`check`
+
+Check whether a Puppet(tm) implementation is installed. Optionally checks the version.
+
+**Supports noop?** false
+
+#### Parameters
+
+##### `version`
+
+Data type: `Optional[String]`
+
+The version of the implementation to check. To check if version meets a minimum, set test to 'ge' and version to x, x.y or x.y.z
+
+##### `test`
+
+Data type: `Enum['eq', 'lt', 'le', 'gt', 'ge']`
+
+Version comparison operator.
 
 ### <a name="install"></a>`install`
 

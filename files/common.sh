@@ -1,8 +1,7 @@
 #! /usr/bin/env bash
 
 # PT_* variables are set by Bolt.
-# shellcheck disable=SC2154
-installdir=$PT__installdir
+declare PT__installdir
 
 tempdir=$(mktemp -d)
 trap 'rm -rf $tempdir' EXIT
@@ -210,7 +209,7 @@ set_os_family() {
 #   $os_major_version
 #   $os_family
 set_platform_globals() {
-  local facts="${installdir}/facts/tasks/bash.sh"
+  local facts="${PT__installdir}/facts/tasks/bash.sh"
   if [ -e "${facts}" ]; then
     platform=$(bash "${facts}" platform)
     os_full_version=$(bash "${facts}" release)

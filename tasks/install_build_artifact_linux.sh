@@ -3,17 +3,13 @@
 set -e
 
 # PT_* variables are set by Bolt.
-# shellcheck disable=SC2154
-installdir=$PT__installdir
-# shellcheck disable=SC2154
-version=${PT_version}
-# shellcheck disable=SC2154
-package=${PT_package:-'openvox-agent'}
-# shellcheck disable=SC2154
-artifacts_source=${PT_artifacts_source:-'https://artifacts.voxpupuli.org'}
+declare PT__installdir
+version=${PT_version:-}
+package=${PT_package:-openvox-agent}
+artifacts_source=${PT_artifacts_source:-https://artifacts.voxpupuli.org}
 
 # shellcheck source=files/common.sh
-source "${installdir}/openvox_bootstrap/files/common.sh"
+source "${PT__installdir}/openvox_bootstrap/files/common.sh"
 
 # Lookup the cpu architecture and set it as cpu_arch.
 # Translates x86_64 to amd64 and aarch64 to arm64 for debian/ubuntu.

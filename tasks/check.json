@@ -1,0 +1,29 @@
+{
+  "description": "Check whether a Puppet(tm) implementation is installed. Optionally checks the version.",
+  "parameters": {
+    "version": {
+      "description": "The version of the implementation to check. To check if version meets a minimum, set test to 'ge' and version to x, x.y or x.y.z",
+      "type": "Optional[String]"
+    },
+    "test": {
+      "description": "Version comparison operator.",
+      "type": "Enum['eq', 'lt', 'le', 'gt', 'ge']",
+      "default": "eq"
+    }
+  },
+  "implementations": [
+    {
+      "name": "check.rb",
+      "input_method": "stdin",
+      "requirements": ["puppet-agent"]
+    },
+    {
+      "name": "check_linux.sh",
+      "input_method": "environment",
+      "requirements": ["shell"],
+      "files": [
+        "openvox_bootstrap/tasks/check.rb"
+      ]
+    }
+  ]
+}

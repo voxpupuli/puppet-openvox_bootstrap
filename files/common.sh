@@ -1,8 +1,7 @@
 #! /usr/bin/env bash
 
 # PT_* variables are set by Bolt.
-# shellcheck disable=SC2154
-installdir=$PT__installdir
+declare PT__installdir
 
 tempdir=$(mktemp -d)
 trap 'rm -rf $tempdir' EXIT
@@ -143,7 +142,7 @@ download() {
   if exists 'wget'; then
     exec_and_capture wget -O "${_file}" "${_url}"
   elif exists 'curl'; then
-    exec_and_capture curl --fail-with-body -sSL -o "${_file}" "${_url}"
+    exec_and_capture curl --fail -sSL -o "${_file}" "${_url}"
   else
     fail "Unable to download ${_url}. Neither wget nor curl are installed."
   fi
@@ -210,7 +209,7 @@ set_os_family() {
 #   $os_major_version
 #   $os_family
 set_platform_globals() {
-  local facts="${installdir}/facts/tasks/bash.sh"
+  local facts="${PT__installdir}/facts/tasks/bash.sh"
   if [ -e "${facts}" ]; then
     platform=$(bash "${facts}" platform)
     os_full_version=$(bash "${facts}" release)

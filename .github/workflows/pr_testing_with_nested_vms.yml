@@ -1,0 +1,66 @@
+---
+name: 'PR Testing with Nested VMs'
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-install-task:
+    strategy:
+      matrix:
+        os:
+          - [almalinux, '8']
+          - [almalinux, '9']
+          - [debian, '10']
+          - [debian, '11']
+          - [debian, '12']
+          - [debian, '13', 'amd64', 'daily-latest']
+          - [rocky, '8']
+          - [rocky, '9']
+          - [ubuntu, '18.04']
+          - [ubuntu, '20.04']
+          - [ubuntu, '22.04']
+          - [ubuntu, '24.04']
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - id: install-bolt
+        uses: ./.github/actions/bolt
+        with:
+          os-codename: jammy
+      - id: vm-cluster
+        uses: jpartlow/nested_vms@v1
+        with:
+          os: ${{ matrix.os[0] }}
+          os-version: ${{ matrix.os[1] }}
+          os-arch: ${{ matrix.os[2] || 'x86_64' }}
+          image_version: ${{ matrix.os[3] }}
+          host-root-access: true
+          ruby-version: '3.3'
+          install-openvox: false
+          # Note: the cpu_mode is set to host-model for the sake of
+          # el-9 which expects at least x86_64-2 arch. This depends on
+          # the runner's architecture being sufficient, and there is
+          # probably a better way to get this set on the libvirt
+          # domain instead.
+          vms: |-
+            [
+              {
+                "role": "agent",
+                "count": 1,
+                "cpus": 2,
+                "mem_mb": 4096,
+                "cpu_mode": "host-model"
+              }
+            ]
+      - name: Run openvox_bootstrap::install task on nested vm
+        run: |-
+          bolt task run openvox_bootstrap::install --inventory kvm_automation_tooling/terraform/instances/inventory.test.yaml --targets test-agent-1
+      - name: Verify openvox-agent is installed
+        run: |-
+          bolt task run openvox_bootstrap::check version=8 test=gt --inventory kvm_automation_tooling/terraform/instances/inventory.test.yaml --targets test-agent-1

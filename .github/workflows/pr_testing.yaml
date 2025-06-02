@@ -13,8 +13,6 @@ env:
   # Environment variables needed when running the task install scripts
   # manually.
   PT__installdir: ${{ github.workspace }}
-  PT_apt_source: "https://apt.voxpupuli.org"
-  PT_yum_source: "https://yum.voxpupuli.org"
 
 jobs:
   shellcheck:
@@ -46,8 +44,7 @@ jobs:
       - name: Run openvox-agent install task
         run: bolt task run openvox_bootstrap::install --targets localhost --run-as root
       - name: Verify openvox-agent is installed
-        run: |-
-          [[ "$(/opt/puppetlabs/bin/puppet --version)" =~ [0-9]+\.[0-9]+\.[0-9]+ ]]
+        run: bolt task run openvox_bootstrap::check --targets localhost --run-as root
       - name: Verify idempotency
         run: bolt task run openvox_bootstrap::install --targets localhost --run-as root
 
@@ -80,7 +77,10 @@ jobs:
           PT_collection: openvox8
         run: ./openvox_bootstrap/tasks/install_linux.sh
       - name: Verify openvox-agent is installed
-        run: /opt/puppetlabs/bin/puppet --version | grep -E '8\.[0-9]+'
+        env:
+          PT_version: '8'
+          PT_test: 'gt'
+        run: ./openvox_bootstrap/tasks/check_linux.sh
       - name: Verify idempotency
         env:
           PT_collection: openvox8
@@ -110,7 +110,9 @@ jobs:
           PT_version: "8.14.0"
         run: ./openvox_bootstrap/tasks/install_linux.sh
       - name: Verify openvox-agent is installed
-        run: /opt/puppetlabs/bin/puppet --version | grep '8.14.0'
+        env:
+          PT_version: "8.14.0"
+        run: ./openvox_bootstrap/tasks/check_linux.sh
       - name: Verify idempotency
         env:
           PT_version: "8.14.0"

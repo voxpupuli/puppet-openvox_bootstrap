@@ -247,8 +247,7 @@ describe 'files/common.sh' do
         expect(status.success?).to be(false)
         expect(output).to include('Executing: curl ')
         expect(output).to include('The requested URL returned error: 404')
-        file = File.read("#{tmpdir}/file")
-        expect(file).to include('404 Not Found')
+        expect(File.exist?("#{tmpdir}/file")).to be(false)
       end
     end
   end

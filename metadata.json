@@ -1,6 +1,6 @@
 {
   "name": "puppet-openvox_bootstrap",
-  "version": "0.3.3-rc0",
+  "version": "0.3.3",
   "summary": "Bootstrap installation of OpenVox packages.",
   "description": "A Bolt project to bootstrap the installation of OpenVox packages.",
   "author": "Josh Partlow",

@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
+## [v0.3.3](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v0.3.3) (2025-06-02)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/v0.3.2...v0.3.3)
+
+**Fixed bugs:**
+
+- Calling curl --fail-with-body fails on almalinux 8 vm, presumably with a curl pre-dating that parameter [\#20](https://github.com/voxpupuli/puppet-openvox_bootstrap/issues/20)
+
+**Merged pull requests:**
+
+- \(gh-20\) Download with curl --fail instead of --fail-with-body [\#21](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/21) ([jpartlow](https://github.com/jpartlow))
+
 ## [v0.3.2](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v0.3.2) (2025-05-29)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/v0.3.1...v0.3.2)

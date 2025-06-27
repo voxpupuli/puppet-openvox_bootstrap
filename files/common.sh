@@ -377,3 +377,126 @@ refresh_package_cache() {
     exit 1
   fi
 }
+
+# Test whether the given package name matches a list of
+# openvox packages that are noarch.
+noarch_package() {
+  local _package="$1"
+
+  # List of noarch packages.
+  local noarch_packages=(
+    'openvox-server'
+    'openvoxdb'
+    'openvoxdb-termini'
+  )
+
+  for pkg in "${noarch_packages[@]}"; do
+    if [[ "${_package}" == "${pkg}" ]]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+# Lookup the cpu architecture and set it as cpu_arch.
+# Translates x86_64 to amd64 and aarch64 to arm64 for debian/ubuntu.
+set_cpu_architecture() {
+  local _family="$1"
+
+  local _arch
+  _arch=$(uname -m)
+  case "${_family}" in
+    debian|ubuntu)
+      case "${_arch}" in
+        x86_64)
+          cpu_arch="amd64"
+          ;;
+        aarch64)
+          cpu_arch="arm64"
+          ;;
+        *)
+          cpu_arch="${_arch}"
+          ;;
+      esac
+      ;;
+    *)
+      cpu_arch="${_arch}"
+      ;;
+  esac
+  export cpu_arch # quiets shellcheck SC2034
+  assigned 'cpu_arch'
+}
+
+# Lookup the architecture for the given package and set it as
+# package_arch.
+#
+# This will either be noarch/all depending on the platform and
+# whether the package name matches an openvox noarch_package(),
+# or it will be the cpu_arch.
+set_package_architecture() {
+  local _package="$1"
+  local _os_family="${2:-${os_family}}"
+
+  if noarch_package "${_package}"; then
+    case "${_os_family}" in
+      debian|ubuntu)
+        package_arch='all'
+      ;;
+      *)
+        package_arch='noarch'
+      ;;
+    esac
+  else
+    set_cpu_architecture "${_os_family}"
+    package_arch="${cpu_arch}"
+  fi
+  export package_arch # quiets shellcheck SC2034
+  assigned 'package_arch'
+}
+
+# Based on platform, package and version set:
+#   package_name - the name of the build artifact package
+#   package_url - the url to download the build artifact package
+#
+# Currently this is based on the structure of the package repository
+# at https://artifacts.voxpupuli.org, which is a page
+# that provides a summary of links to artifacts contained in an S3
+# bucket hosted by Oregon State University Open Source Lab.
+#
+# Example rpm:
+# https://artifacts.voxpupuli.org/openvox-agent/8.15.0/openvox-agent-8.15.0-1.el8.x86_64.rpm
+# Example deb:
+# https://artifacts.voxpupuli.org/openvox-agent/8.15.0/openvox-agent_8.15.0-1%2Bdebian12_amd64.deb
+set_artifacts_package_url() {
+  local _artifacts_source="$1"
+  local _package="$2"
+  local _version="$3"
+
+  set_package_type "${os_family}"
+  set_package_architecture "${_package}" "${os_family}"
+
+  case "${package_type}" in
+    rpm)
+      # Account for a fedora naming quirk in the build artifacts.
+      if [[ "${os_family}" == "fedora" ]]; then
+        _os_family="fc"
+      else
+        _os_family="${os_family}"
+      fi
+      package_name="${_package}-${_version}-1.${_os_family}${os_major_version}.${package_arch}.${package_type}"
+      ;;
+    deb)
+      package_name="${_package}_${_version}-1%2B${os_family}${os_full_version}_${package_arch}.${package_type}"
+      ;;
+    *)
+      fail "Unhandled package type: '${package_type}'"
+      ;;
+  esac
+  package_url="${_artifacts_source}/${_package}/${_version}/${package_name}"
+
+  export package_name # quiets shellcheck SC2034
+  assigned 'package_name'
+  export package_url # quiets shellcheck SC2034
+  assigned 'package_url'
+}

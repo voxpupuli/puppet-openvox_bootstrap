@@ -261,38 +261,26 @@ describe 'files/common.sh' do
       end
 
       it 'sets platform globals' do
-        output, status = test(<<~EOT)
-          set_platform_globals
-          echo "set platform=$platform"
-          echo "set os_full_version=$os_full_version"
-          echo "set os_major_version=$os_major_version"
-          echo "set os_family=$os_family"
-        EOT
+        output, status = test('set_platform_globals')
 
         expect(status.success?).to be(true)
-        expect(output).to include('set platform=Ubuntu')
-        expect(output).to include('set os_full_version=24.04')
-        expect(output).to include('set os_major_version=24')
-        expect(output).to include('set os_family=ubuntu')
+        expect(output).to include('Assigned platform=Ubuntu')
+        expect(output).to include('Assigned os_full_version=24.04')
+        expect(output).to include('Assigned os_major_version=24')
+        expect(output).to include('Assigned os_family=ubuntu')
       end
 
       context 'with a pre-release' do
         let(:os) { :debian13 }
 
         it 'uses codename when release is n/a' do
-          output, status = test(<<~EOT)
-            set_platform_globals
-            echo "set platform=$platform"
-            echo "set os_full_version=$os_full_version"
-            echo "set os_major_version=$os_major_version"
-            echo "set os_family=$os_family"
-          EOT
+          output, status = test('set_platform_globals')
 
           expect(status.success?).to be(true)
-          expect(output).to include('set platform=Debian')
-          expect(output).to include('set os_full_version=13')
-          expect(output).to include('set os_major_version=13')
-          expect(output).to include('set os_family=debian')
+          expect(output).to include('Assigned platform=Debian')
+          expect(output).to include('Assigned os_full_version=13')
+          expect(output).to include('Assigned os_major_version=13')
+          expect(output).to include('Assigned os_family=debian')
         end
       end
     end
@@ -308,13 +296,7 @@ describe 'files/common.sh' do
       it 'fails for an unknown platform' do
         mock_facts_task_bash_sh(:unknown)
 
-        output, status = test(<<~EOT)
-          set_platform_globals
-          echo "set platform=$platform"
-          echo "set os_full_version=$os_full_version"
-          echo "set os_major_version=$os_major_version"
-          echo "set os_family=$os_family"
-        EOT
+        output, status = test('set_platform_globals')
 
         expect(status.success?).to be(false)
         expect(output).to include("Unhandled platform: 'Unknown'")
@@ -436,6 +418,144 @@ describe 'files/common.sh' do
 
         expect(status.success?).to be(false)
         expect(output).to include('Neither dnf, yum nor zypper are installed')
+      end
+    end
+  end
+
+  context 'noarch_package' do
+    it 'returns 0 for a noarch package' do
+      output, status = test('noarch_package openvox-server')
+
+      expect(status.success?).to be(true)
+      expect(output.strip).to be_empty
+    end
+
+    it 'returns 1 for a non-noarch package' do
+      output, status = test('noarch_package foo')
+
+      expect(status.success?).to be(false)
+      expect(output.strip).to be_empty
+    end
+  end
+
+  context 'set_cpu_architecture' do
+    context 'debian or ubuntu' do
+      it 'sets x86_64 for amd64' do
+        allow_script.to receive_command(:uname).and_exec('echo x86_64')
+        output, status = test('set_cpu_architecture debian')
+
+        expect(status.success?).to be(true)
+        expect(output).to include('Assigned cpu_arch=amd64')
+      end
+
+      it 'sets arm64 for aarch64' do
+        allow_script.to receive_command(:uname).and_exec('echo aarch64')
+        output, status = test('set_cpu_architecture ubuntu')
+
+        expect(status.success?).to be(true)
+        expect(output).to include('Assigned cpu_arch=arm64')
+      end
+
+      it 'sets amd64 for amd64' do
+        allow_script.to receive_command(:uname).and_exec('echo amd64')
+        output, status = test('set_cpu_architecture debian')
+
+        expect(status.success?).to be(true)
+        expect(output).to include('Assigned cpu_arch=amd64')
+      end
+    end
+
+    context 'other' do
+      it 'sets what uname gives it' do
+        allow_script.to receive_command(:uname).and_exec('echo x86_64')
+        output, status = test('set_cpu_architecture el')
+
+        expect(status.success?).to be(true)
+        expect(output).to include('Assigned cpu_arch=x86_64')
+      end
+    end
+  end
+
+  context 'set_package_architecture' do
+    it 'sets all for debian noarch' do
+      output, status = test('set_package_architecture openvox-server debian')
+
+      expect(status.success?).to be(true)
+      expect(output).to include('Assigned package_arch=all')
+    end
+
+    it 'sets noarch for el noarch' do
+      output, status = test('set_package_architecture openvoxdb el')
+
+      expect(status.success?).to be(true)
+      expect(output).to include('Assigned package_arch=noarch')
+    end
+
+    it 'sets system arch otherwise' do
+      allow_script.to receive_command(:uname).and_exec('echo x86_64')
+      output, status = test('set_package_architecture openvox-agent el')
+
+      expect(status.success?).to be(true)
+      expect(output).to include('Assigned cpu_arch=x86_64')
+      expect(output).to include('Assigned package_arch=x86_64')
+    end
+  end
+
+  context 'set_artifacts_package_url' do
+    context 'deb' do
+      it 'builds a debian url' do
+        allow_script.to set_env('os_family', 'debian')
+        allow_script.to receive_command(:uname).and_exec('echo x86_64')
+        output, status = test('set_artifacts_package_url https://foo openvox-agent 8.18.0')
+
+        expect(status.success?).to be(true)
+        package_name = 'openvox-agent_8.18.0-1%2Bdebian_amd64.deb'
+        expect(output).to include("Assigned package_name=#{package_name}")
+        expect(output).to include("Assigned package_url=https://foo/openvox-agent/8.18.0/#{package_name}")
+      end
+
+      it 'builds a noarch package url for ubuntu' do
+        allow_script.to set_env('os_family', 'ubuntu')
+        output, status = test('set_artifacts_package_url https://foo openvox-server 8.9.0')
+
+        expect(status.success?).to be(true)
+        package_name = 'openvox-server_8.9.0-1%2Bubuntu_all.deb'
+        expect(output).to include("Assigned package_name=#{package_name}")
+        expect(output).to include("Assigned package_url=https://foo/openvox-server/8.9.0/#{package_name}")
+      end
+    end
+
+    context 'rpm' do
+      it 'builds a redhat url' do
+        allow_script.to set_env('os_family', 'el')
+        allow_script.to receive_command(:uname).and_exec('echo x86_64')
+        output, status = test('set_artifacts_package_url https://foo openvox-agent 8.18.0')
+
+        expect(status.success?).to be(true)
+        package_name = 'openvox-agent-8.18.0-1.el.x86_64.rpm'
+        expect(output).to include("Assigned package_name=#{package_name}")
+        expect(output).to include("Assigned package_url=https://foo/openvox-agent/8.18.0/#{package_name}")
+      end
+
+      it 'builds a noarch package url for redhat' do
+        allow_script.to set_env('os_family', 'el')
+        output, status = test('set_artifacts_package_url https://foo openvoxdb-termini 8.9.1')
+
+        expect(status.success?).to be(true)
+        package_name = 'openvoxdb-termini-8.9.1-1.el.noarch.rpm'
+        expect(output).to include("Assigned package_name=#{package_name}")
+        expect(output).to include("Assigned package_url=https://foo/openvoxdb-termini/8.9.1/#{package_name}")
+      end
+
+      it 'builds a fedora url' do
+        allow_script.to set_env('os_family', 'fedora')
+        allow_script.to receive_command(:uname).and_exec('echo x86_64')
+        output, status = test('set_artifacts_package_url https://foo openvox-agent 8.18.0')
+
+        expect(status.success?).to be(true)
+        package_name = 'openvox-agent-8.18.0-1.fc.x86_64.rpm'
+        expect(output).to include("Assigned package_name=#{package_name}")
+        expect(output).to include("Assigned package_url=https://foo/openvox-agent/8.18.0/#{package_name}")
       end
     end
   end

@@ -58,9 +58,15 @@ jobs:
                 "cpu_mode": "host-model"
               }
             ]
+      - name: Capture dereferenced inventory for use with openvox_bootstrap
+        working-directory: kvm_automation_tooling
+        run: |-
+          bolt inventory --inventory terraform/instances/inventory.test.yaml show --format json --detail | \
+            jq '.inventory | with_entries(select(.key == "targets")) | del(.targets[0].groups)' | \
+            yq -P > ../inventory.yaml
       - name: Run openvox_bootstrap::install task on nested vm
         run: |-
-          bolt task run openvox_bootstrap::install --inventory kvm_automation_tooling/terraform/instances/inventory.test.yaml --targets test-agent-1
+          bolt task run openvox_bootstrap::install --inventory inventory.yaml --targets test-agent-1
       - name: Verify openvox-agent is installed
         run: |-
-          bolt task run openvox_bootstrap::check version=8 test=gt --inventory kvm_automation_tooling/terraform/instances/inventory.test.yaml --targets test-agent-1
+          bolt task run openvox_bootstrap::check version=8 test=gt --inventory inventory.yaml --targets test-agent-1

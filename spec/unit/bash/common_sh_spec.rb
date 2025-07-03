@@ -544,7 +544,7 @@ describe 'files/common.sh' do
         expect(status.success?).to be(true)
         package_name = 'openvoxdb-termini-8.9.1-1.el.noarch.rpm'
         expect(output).to include("Assigned package_name=#{package_name}")
-        expect(output).to include("Assigned package_url=https://foo/openvoxdb-termini/8.9.1/#{package_name}")
+        expect(output).to include("Assigned package_url=https://foo/openvoxdb/8.9.1/#{package_name}")
       end
 
       it 'builds a fedora url' do
@@ -556,6 +556,24 @@ describe 'files/common.sh' do
         package_name = 'openvox-agent-8.18.0-1.fc.x86_64.rpm'
         expect(output).to include("Assigned package_name=#{package_name}")
         expect(output).to include("Assigned package_url=https://foo/openvox-agent/8.18.0/#{package_name}")
+      end
+    end
+
+    context 'pathing' do
+      it 'looks for openvoxdb in the openvoxdb dir' do
+        allow_script.to set_env('os_family', 'el')
+        output, status = test('set_artifacts_package_url https://foo openvoxdb 8.9.1')
+
+        expect(status.success?).to be(true)
+        expect(output).to match(%r{Assigned package_url=https://foo/openvoxdb/8\.9\.1/})
+      end
+
+      it 'lookds for openvoxdb-termini in the openvoxdb dir as well' do
+        allow_script.to set_env('os_family', 'el')
+        output, status = test('set_artifacts_package_url https://foo openvoxdb-termini 8.9.1')
+
+        expect(status.success?).to be(true)
+        expect(output).to match(%r{Assigned package_url=https://foo/openvoxdb/8\.9\.1/})
       end
     end
   end

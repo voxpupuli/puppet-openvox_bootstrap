@@ -493,7 +493,17 @@ set_artifacts_package_url() {
       fail "Unhandled package type: '${package_type}'"
       ;;
   esac
-  package_url="${_artifacts_source}/${_package}/${_version}/${package_name}"
+
+  case "${_package}" in
+    openvoxdb-termini)
+      local _package_dir='openvoxdb'
+      ;;
+    *)
+      local _package_dir="${_package}"
+      ;;
+  esac
+
+  package_url="${_artifacts_source}/${_package_dir}/${_version}/${package_name}"
 
   export package_name # quiets shellcheck SC2034
   assigned 'package_name'

@@ -76,6 +76,13 @@ jobs:
   test-install-build-artifact-task-noarch:
     strategy:
       matrix:
+        package:
+          - name: openvox-server
+            version: 8.8.0
+          - name: openvoxdb
+            version: 8.9.0
+          - name: openvoxdb-termini
+            version: 8.9.0
         details:
           - image: almalinux:9
             prereqs:
@@ -124,12 +131,15 @@ jobs:
       - name: Test noarch package installation
         env:
           PT__installdir: ${{ github.workspace }}
-          PT_package: "openvox-server"
-          PT_version: "8.8.0"
+          PT_package: ${{ matrix.package.name }}
+          PT_version: ${{ matrix.package.version }}
         run: ./openvox_bootstrap/tasks/install_build_artifact_linux.sh
       - name: Verify openvox-server is installed
         shell: bash
+        env:
+          PACKAGE: ${{ matrix.package.name }}
+          VERSION: ${{ matrix.package.version }}
         run: |-
-          /opt/puppetlabs/bin/puppet resource package openvox-server > openvox-server.status
-          cat openvox-server.status
-          grep "ensure.*=>.*'8.8.0" openvox-server.status
+          /opt/puppetlabs/bin/puppet resource package "${PACKAGE}" > openvox-package.status
+          cat openvox-package.status
+          grep "ensure.*=>.*'${VERSION}" openvox-package.status

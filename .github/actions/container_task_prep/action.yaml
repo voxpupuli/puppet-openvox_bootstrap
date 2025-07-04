@@ -24,9 +24,9 @@ runs:
         # ...possibly this should be moved into the
         # install_build_artifact task scripts.
         set_platform_globals
-        if [[ "${platform}" == 'Rocky' ]]; then
-          # The Rocky9 container, at least, is missing openvox-agent's
-          # systemd dependency...
+        if [[ "${platform}" == 'Rocky' ]] || [[ "${platform}" == 'Fedora' ]]; then
+          # The Rocky9 and Fedora containers, at least, are missing
+          # openvox-agent's systemd dependency...
           exec_and_capture dnf install -y systemd
           if [[ "${os_major_version}" == '8' ]]; then
             # ...and the Rocky8 container is missing findutils.

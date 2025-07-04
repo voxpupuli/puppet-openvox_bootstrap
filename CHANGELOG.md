@@ -4,7 +4,15 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
-## [v0.3.3](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v0.3.3) (2025-06-02)
+## [v0.4.0](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v0.4.0) (2025-07-04)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/v0.3.3...v0.4.0)
+
+**Merged pull requests:**
+
+- Handle noarch artifacts [\#24](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/24) ([jpartlow](https://github.com/jpartlow))
+
+## [v0.3.3](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v0.3.3) (2025-06-03)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/v0.3.2...v0.3.3)
 

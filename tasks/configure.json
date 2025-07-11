@@ -1,0 +1,27 @@
+{
+  "description": "Provides initial configuration for a freshly installed openvox-agent.",
+  "input_method": "stdin",
+  "files": [
+    "openvox_bootstrap/lib/openvox_bootstrap/task.rb"
+  ],
+  "parameters": {
+    "puppet_conf": {
+      "description": "Hash of puppet configuration settings to write to the puppet.conf ini file. NOTE: This will completely overwrite any existing settings in the file; there is no merging behavior in this task.",
+      "type": "Optional[Openvox_bootstrap::Ini_file]"
+    },
+    "csr_attributes": {
+      "description": "Hash of CSR attributes (custom_attributes and extension_requests) to write to the csr_attributes.yaml file. NOTE: This will completely overwrite any existing settings in the file; there is no merging behavior in this task.",
+      "type": "Optional[Openvox_bootstrap::Csr_attributes]"
+    },
+    "puppet_service_running": {
+      "description": "Whether the Puppet service should be running after this task completes. Defaults to true.",
+      "type": "Boolean",
+      "default": true
+    },
+    "puppet_service_enabled": {
+      "description": "Whether the Puppet service should be enabled to start on boot after this task completes. Defaults to true.",
+      "type": "Boolean",
+      "default": true
+    }
+  }
+}

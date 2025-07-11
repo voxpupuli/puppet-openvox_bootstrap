@@ -1,10 +1,10 @@
 #! /opt/puppetlabs/puppet/bin/ruby
 # frozen_string_literal: true
 
-require 'json'
+require_relative '../lib/openvox_bootstrap/task'
 
 module OpenvoxBootstrap
-  class Check
+  class Check < Task
     # Get the Puppet version from the installed Puppet library.
     #
     # "require 'puppet/version'" can be fooled by the Ruby environment
@@ -22,17 +22,7 @@ module OpenvoxBootstrap
 
     # Run the task and print the result as JSON.
     def self.run
-      params = JSON.parse($stdin.read)
-      raise(ArgumentError, <<~ERR) unless params.is_a?(Hash)
-        Expected a Hash, got #{params.class}: #{params.inspect}
-      ERR
-
-      params.transform_keys!(&:to_sym)
-      # Clean out empty params so that task defaults are used.
-      params.delete_if { |_, v| v.nil? || v == '' }
-
-      result = Check.new.task(**params)
-      puts JSON.pretty_generate(result)
+      result = super
       result[:valid] ? exit(0) : exit(1)
     end
 

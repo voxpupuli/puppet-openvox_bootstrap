@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'json'
-
 # Mirrors the output from puppetlabs-facts.
 module OBRspecFacts
   UBUNTU_2404 = {
@@ -128,5 +126,26 @@ RSpec.shared_context 'bash_prep' do
           ;;
       esac
     EOF
+  end
+end
+
+RSpec.shared_context 'task_run_helpers' do
+  def validate_task_run_for(subject, input:, expected: {}, code: 0)
+    old_stdin = $stdin
+    $stdin = StringIO.new(input.to_json)
+    old_stdout = $stdout
+    $stdout = StringIO.new
+
+    begin
+      subject.run
+    rescue SystemExit => e
+      expect(e.status).to eq(code)
+    end
+
+    output = JSON.parse($stdout.string, symbolize_names: true)
+    expect(output).to eq(expected)
+  ensure
+    $stdin = old_stdin
+    $stdout = old_stdout
   end
 end

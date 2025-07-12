@@ -15,13 +15,18 @@
     {
       "name": "check.rb",
       "input_method": "stdin",
-      "requirements": ["puppet-agent"]
+      "requirements": ["puppet-agent"],
+      "files": [
+        "openvox_bootstrap/lib/openvox_bootstrap/task.rb",
+        "openvox_bootstrap/tasks/check.rb"
+      ]
     },
     {
       "name": "check_linux.sh",
       "input_method": "environment",
       "requirements": ["shell"],
       "files": [
+        "openvox_bootstrap/lib/openvox_bootstrap/task.rb",
         "openvox_bootstrap/tasks/check.rb"
       ]
     }

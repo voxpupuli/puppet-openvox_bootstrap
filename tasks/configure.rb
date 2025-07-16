@@ -2,11 +2,24 @@
 # frozen_string_literal: true
 
 require_relative '../lib/openvox_bootstrap/task'
+require 'etc'
 require 'open3'
 require 'yaml'
 
 module OpenvoxBootstrap
   class Configure < Task
+    def puppet_uid
+      Etc.getpwnam('puppet').uid
+    rescue ArgumentError
+      nil
+    end
+
+    def puppet_gid
+      Etc.getgrnam('puppet').gid
+    rescue ArgumentError
+      nil
+    end
+
     # Overwrite puppet.conf with the values in the puppet_conf hash.
     #
     # Does nothing if given an empty or nil puppet_conf.
@@ -42,6 +55,9 @@ module OpenvoxBootstrap
     # Does nothing if given an empty or nil csr_attributes.
     #
     # The file will be mode 640.
+    # It will either be owned root:root (assuming task is run as root,
+    # as expected), or puppet:puppet if the puppet user and group
+    # exist (openvox-server package is installed).
     #
     # @param csr_attributes [Hash] A hash of custom_attributes
     #   and extension_requests to write to the csr_attributes.yaml
@@ -55,6 +71,8 @@ module OpenvoxBootstrap
       File.open(csr_attributes_path, 'w', perm: 0o640) do |f|
         f.write(csr_attributes_contents)
       end
+      # nil uid/gid are ignored by FileUtils.chown...
+      File.chown(puppet_uid, puppet_gid, csr_attributes_path)
 
       {
         csr_attributes: {

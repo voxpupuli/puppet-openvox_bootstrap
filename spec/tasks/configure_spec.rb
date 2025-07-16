@@ -59,6 +59,33 @@ describe 'openvox_bootstrap::configure' do
     end
   end
 
+  def check_returned_id(uid_or_gid)
+    case uid_or_gid
+    when Integer
+      uid_or_gid > 0
+    when nil
+      true # If the user does not exist, it returns nil.
+    else
+      false # Should not return anything else.
+    end
+  end
+
+  describe '#puppet_uid' do
+    it 'returns the UID of the puppet user' do
+      expect(task.puppet_uid).to satisfy do |uid|
+        check_returned_id(uid)
+      end
+    end
+  end
+
+  describe '#puppet_gid' do
+    it 'returns the GID of the puppet group' do
+      expect(task.puppet_gid).to satisfy do |gid|
+        check_returned_id(gid)
+      end
+    end
+  end
+
   describe '#write_csr_attributes' do
     let(:csr_attributes) do
       {

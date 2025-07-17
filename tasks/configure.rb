@@ -6,6 +6,7 @@ require 'etc'
 require 'open3'
 require 'yaml'
 
+# rubocop:disable Style/NegatedIf
 module OpenvoxBootstrap
   class Configure < Task
     def puppet_uid
@@ -20,33 +21,59 @@ module OpenvoxBootstrap
       nil
     end
 
-    # Overwrite puppet.conf with the values in the puppet_conf hash.
+    def puppet_config_set(section, key, value)
+      command = [
+        '/opt/puppetlabs/bin/puppet',
+        'config',
+        'set',
+        '--section', section,
+        key,
+        value,
+      ]
+      Open3.capture2e(*command)
+    end
+
+    # Add the given settings to the puppet.conf file using
+    # puppet-config.
     #
-    # Does nothing if given an empty or nil puppet_conf.
+    # Does nothing if given an empty or nil settings hash.
     #
-    # @param puppet_conf [Hash<String,Hash<String,String>>] A hash of
-    #   sections and settings to write to the puppet.conf file.
+    # @param settings [Hash<String,Hash<String,String>>]
+    #   A hash of sections and settings to add to the
+    #   puppet.conf file.
     # @return [Hash]
-    def write_puppet_conf(puppet_conf, etc_puppet_path = '/etc/puppetlabs/puppet')
-      return {} if puppet_conf.nil? || puppet_conf.empty?
+    def update_puppet_conf(settings, etc_puppet_path = '/etc/puppetlabs/puppet')
+      return {} if settings.nil? || settings.empty?
 
       conf_path = File.join(etc_puppet_path, 'puppet.conf')
-      sections = puppet_conf.map do |section, settings|
-        "[#{section}]\n" +
-          settings.map { |key, value| "#{key} = #{value}" }.join("\n")
+      success = true
+      errors = {}
+      settings.each do |section, section_settings|
+        section_settings.each do |key, value|
+          output, status = puppet_config_set(section, key, value)
+          success &&= status.success?
+          if !status.success?
+            err_key = "--section=#{section} #{key}=#{value}"
+            errors[err_key] = output
+          end
+        end
       end
-      puppet_conf_contents = "#{sections.join("\n\n")}\n"
 
-      File.open(conf_path, 'w', perm: 0o644) do |f|
-        f.write(puppet_conf_contents)
-      end
+      puppet_conf_contents = if File.exist?(conf_path)
+                               File.read(conf_path)
+                             else
+                               ''
+                             end
 
-      {
+      result = {
         puppet_conf: {
           path: conf_path,
           contents: puppet_conf_contents,
+          successful: success,
         }
       }
+      result[:puppet_conf][:errors] = errors if !success
+      result
     end
 
     # Overwrite the csr_attributes.yaml file with the given
@@ -78,6 +105,7 @@ module OpenvoxBootstrap
         csr_attributes: {
           path: csr_attributes_path,
           contents: csr_attributes_contents,
+          successful: true,
         }
       }
     end
@@ -118,25 +146,31 @@ module OpenvoxBootstrap
       puppet_service_enabled: true,
       **_kwargs
     )
-      puppet_conf_result = write_puppet_conf(puppet_conf)
-      csr_result = write_csr_attributes(csr_attributes)
-      puppet_service_result = manage_puppet_service(puppet_service_running, puppet_service_enabled)
+      results = {}
+      results.merge!(update_puppet_conf(puppet_conf))
+      results.merge!(write_csr_attributes(csr_attributes))
+      results.merge!(
+        manage_puppet_service(puppet_service_running, puppet_service_enabled)
+      )
 
-      results = puppet_conf_result.merge(
-        csr_result
-      ).merge(puppet_service_result)
+      success = results.all? { |_, details| details[:successful] }
 
-      success = results[:puppet_service][:successful]
       if success
         results
       else
         puts JSON.pretty_generate(results)
-        puts "\nFailed managing the puppet service:\n\n"
-        puts results[:puppet_service][:output]
+        results.each do |config, details|
+          next if details[:successful]
+
+          puts "\nFailed managing #{config}:\n\n"
+          puts details[:output] if details.key?(:output)
+          pp details[:errors] if details.key?(:errors)
+        end
         exit 1
       end
     end
   end
 end
+# rubocop:enable Style/NegatedIf
 
 OpenvoxBootstrap::Configure.run if __FILE__ == $PROGRAM_NAME

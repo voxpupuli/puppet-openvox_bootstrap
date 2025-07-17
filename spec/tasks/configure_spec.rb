@@ -5,9 +5,11 @@ require_relative '../../tasks/configure'
 
 # rubocop:disable RSpec/MessageSpies
 # rubocop:disable RSpec/StubbedMock
+# rubocop:disable RSpec/MultipleMemoizedHelpers
 describe 'openvox_bootstrap::configure' do
   let(:tmpdir) { Dir.mktmpdir('openvox_bootstrap-configure-spec') }
   let(:task) { OpenvoxBootstrap::Configure.new }
+  let(:puppet_config_set_calls) { [] }
 
   around do |example|
     example.run
@@ -15,7 +17,33 @@ describe 'openvox_bootstrap::configure' do
     FileUtils.remove_entry_secure(tmpdir)
   end
 
-  describe '#write_puppet_conf' do
+  before do
+    allow(task).to receive(:puppet_config_set) do |section, key, value|
+      puppet_config_set_calls << [section, key, value]
+      if key == 'oops'
+        ['error output', instance_double(Process::Status, success?: false)]
+      else
+        ['', instance_double(Process::Status, success?: true)]
+      end
+    end
+  end
+
+  describe '#puppet_config_set' do
+    it 'calls puppet config set with the correct arguments' do
+      expect(Open3).to receive(:capture2e).with(
+        '/opt/puppetlabs/bin/puppet',
+        'config',
+        'set',
+        '--section', 'main',
+        'server',
+        'puppet.spec'
+      )
+      t = OpenvoxBootstrap::Configure.new
+      t.puppet_config_set('main', 'server', 'puppet.spec')
+    end
+  end
+
+  describe '#update_puppet_conf' do
     let(:puppet_conf) do
       {
         'main' => {
@@ -28,34 +56,49 @@ describe 'openvox_bootstrap::configure' do
       }
     end
     let(:puppet_conf_path) { File.join(tmpdir, 'puppet.conf') }
-    let(:puppet_conf_contents) do
-      <<~CONF
-        [main]
-        server = puppet.spec
-        certname = agent.spec
 
-        [agent]
-        environment = test
-      CONF
-    end
-
-    it 'writes a puppet.conf ini' do
-      expect(task.write_puppet_conf(puppet_conf, tmpdir)).to(
+    it 'call puppet config set' do
+      expect(task.update_puppet_conf(puppet_conf, tmpdir)).to(
         eq(
           {
             puppet_conf: {
               path: puppet_conf_path,
-              contents: puppet_conf_contents
+              contents: '',
+              successful: true,
             }
           }
         )
       )
-      expect(File.read(puppet_conf_path)).to eq(puppet_conf_contents)
+      expect(puppet_config_set_calls).to eq(
+        [
+          ['main', 'server', 'puppet.spec'],
+          ['main', 'certname', 'agent.spec'],
+          ['agent', 'environment', 'test'],
+        ]
+      )
     end
 
     it 'does nothing if given an empty config' do
-      expect(task.write_puppet_conf(nil)).to eq({})
-      expect(task.write_puppet_conf({})).to eq({})
+      expect(task.update_puppet_conf(nil)).to eq({})
+      expect(task.update_puppet_conf({})).to eq({})
+    end
+
+    it 'records error output if puppet config set fails' do
+      puppet_conf['main']['oops'] = 'fail'
+      expect(task.update_puppet_conf(puppet_conf, tmpdir)).to(
+        eq(
+          {
+            puppet_conf: {
+              path: puppet_conf_path,
+              contents: '',
+              successful: false,
+              errors: {
+                '--section=main oops=fail' => 'error output',
+              },
+            }
+          }
+        )
+      )
     end
   end
 
@@ -115,6 +158,7 @@ describe 'openvox_bootstrap::configure' do
             csr_attributes: {
               path: csr_attributes_path,
               contents: csr_attributes_contents,
+              successful: true,
             }
           }
         )
@@ -181,6 +225,20 @@ describe 'openvox_bootstrap::configure' do
       )
     end
 
+    it 'returns a result has if all steps are successful' do
+      expect(task).to receive(:update_puppet_conf).and_return({ puppet_conf: { successful: true } })
+      expect(task).to receive(:write_csr_attributes).and_return({ csr_attributes: { successful: true } })
+      expect(task).to receive(:manage_puppet_service).and_return({ puppet_service: { successful: true } })
+
+      expect(task.task).to eq(
+        {
+          csr_attributes: { successful: true },
+          puppet_conf: { successful: true },
+          puppet_service: { successful: true },
+        }
+      )
+    end
+
     it 'prints results and exits 1 if puppet service fails' do
       expect(task).to(
         receive(:manage_puppet_service).
@@ -204,9 +262,46 @@ describe 'openvox_bootstrap::configure' do
               }
             }
 
-            Failed managing the puppet service:
+            Failed managing puppet_service:
 
             apply failed
+          EOM
+        ).and(output('').to_stderr)
+      )
+    end
+
+    it 'prints results and exits 1 if any step fails' do
+      expect(task).to receive(:manage_puppet_service).and_return({ puppet_service: { successful: true } })
+      expect(task).to(
+        receive(:update_puppet_conf).
+        and_return(
+          {
+            puppet_conf: {
+              successful: false,
+              errors: { '--section=main server=puppet.spec' => 'error output' }
+            }
+          }
+        )
+      )
+
+      expect { task.task }.to(
+        raise_error(SystemExit).and(
+          output(<<~EOM).to_stdout
+            {
+              "puppet_conf": {
+                "successful": false,
+                "errors": {
+                  "--section=main server=puppet.spec": "error output"
+                }
+              },
+              "puppet_service": {
+                "successful": true
+              }
+            }
+
+            Failed managing puppet_conf:
+
+            {"--section=main server=puppet.spec"=>"error output"}
           EOM
         ).and(output('').to_stderr)
       )
@@ -215,3 +310,4 @@ describe 'openvox_bootstrap::configure' do
 end
 # rubocop:enable RSpec/MessageSpies
 # rubocop:enable RSpec/StubbedMock
+# rubocop:enable RSpec/MultipleMemoizedHelpers

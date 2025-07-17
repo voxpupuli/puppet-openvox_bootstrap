@@ -1,0 +1,175 @@
+---
+name: 'PR Testing the configure task'
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  # These openvox_bootstrap::configure parameters are used in both
+  # the agent and server task runs, but puppet_conf will vary.
+  COMMON_CONFIGURE_PARAMS: |-
+    "csr_attributes": {
+       "custom_attributes": {
+          "1.2.840.113549.1.9.7": "password"
+       },
+       "extension_requests": {
+          "pp_role": "tomato"
+       }
+    },
+    "puppet_service_running": true,
+    "puppet_service_enabled": false
+
+jobs:
+  test-configure-task:
+    strategy:
+      matrix:
+        os:
+          - [almalinux, '9']
+          - [ubuntu, '24.04']
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - id: install-bolt
+        uses: ./.github/actions/bolt
+        with:
+          os-codename: jammy
+      - id: vm-cluster
+        uses: jpartlow/nested_vms@v1
+        with:
+          os: ${{ matrix.os[0] }}
+          os-version: ${{ matrix.os[1] }}
+          os-arch: ${{ matrix.os[2] || 'x86_64' }}
+          host-root-access: true
+          ruby-version: '3.3'
+          install-openvox: false
+          vms: |-
+            [
+              {
+                "role": "primary",
+                "cpus": 4,
+                "mem_mb": 8192,
+                "cpu_mode": "host-model"
+              },
+              {
+                "role": "agent",
+                "cpus": 2,
+                "mem_mb": 4096,
+                "cpu_mode": "host-model"
+              }
+            ]
+      - name: Capture dereferenced inventory for use with openvox_bootstrap
+        working-directory: kvm_automation_tooling
+        run: |-
+          bolt inventory --inventory terraform/instances/inventory.test.yaml show --format json --detail | \
+            jq '.inventory | with_entries(select(.key == "targets")) | del(.targets[].groups)' | \
+            yq -P > ../inventory.yaml
+          cat ../inventory.yaml
+      - name: Install openvox
+        run: |-
+          bolt task run openvox_bootstrap::install --inventory inventory.yaml --targets test-primary-1,test-agent-1
+      - name: Install openvox-server
+        run: |-
+          bolt task run openvox_bootstrap::install --inventory inventory.yaml --targets test-primary-1 package=openvox-server
+      - name: Disable agents to prevent background service runs
+        run: |-
+          bolt command run '/opt/puppetlabs/bin/puppet agent --disable "OpenVox PR testing"' --inventory inventory.yaml --targets test-agent-1,test-primary-1
+      - name: Write server configure params
+        run: |-
+          cat > server-params.json <<EOF
+          {
+            "puppet_conf": {
+               "main": {
+                  "server": "test-primary-1.vm"
+               },
+               "server": {
+                   "autosign": "/etc/puppetlabs/puppet/sign.sh"
+               }
+            },
+            ${COMMON_CONFIGURE_PARAMS}
+          }
+          EOF
+          cat server-params.json
+      - name: Run openvox_boostrap::configure task on the primary
+        run: |-
+          bolt task run openvox_bootstrap::configure --inventory inventory.yaml --targets test-primary-1 --params @server-params.json
+      - name: Configure openvox-server
+        env:
+          PUPPET_CONF: |-
+          SIGN_SH: |-
+        run: |-
+          cat > sign.sh <<'EOF'
+          #!/bin/bash
+          set -e
+          csr_pem=$(cat)
+          csr_text=$(openssl req -text <<<"$csr_pem")
+          password=$(awk -F: -e '/challengePassword/ { print $2 }' <<<"$csr_text")
+          [[ "${password}" == 'password' ]]
+          EOF
+          bolt file upload sign.sh /etc/puppetlabs/puppet/sign.sh --inventory inventory.yaml --targets test-primary-1
+
+          cat > standup.sh <<'EOF'
+          #! /bin/bash
+          set -e
+          set -x
+
+          chmod 750 /etc/puppetlabs/puppet/sign.sh
+          chown puppet:puppet /etc/puppetlabs/puppet/sign.sh
+
+          set +e
+          systemctl start puppetserver
+          if [ $? -ne 0 ]; then
+            cat /var/log/puppetlabs/puppetserver/puppetserver.log
+            exit 1
+          fi
+          EOF
+          bolt script run standup.sh --inventory inventory.yaml --targets test-primary-1 --stream
+      - name: Write agent configure params
+        run: |-
+          cat > agent-params.json <<EOF
+          {
+            "puppet_conf": {
+               "main": {
+                  "server": "test-primary-1.vm"
+               }
+            },
+            ${COMMON_CONFIGURE_PARAMS}
+          }
+          EOF
+          cat agent-params.json
+      - name: Run openvox_bootstrap::configure task on the agent
+        run: |-
+          bolt task run openvox_bootstrap::configure --inventory inventory.yaml --targets test-agent-1 --params @agent-params.json
+      - name: Validate agent run on the primary
+        run: |-
+          bolt command run '/opt/puppetlabs/bin/puppet agent --agent_disabled_lockfile=/tmp/not_locked.lock --test' --inventory inventory.yaml --targets test-primary-1 --stream
+      - name: Validate agent run on the agent
+        run: |-
+          bolt command run '/opt/puppetlabs/bin/puppet agent --agent_disabled_lockfile=/tmp/not_locked.lock --test' --inventory inventory.yaml --targets test-agent-1 --stream
+      - name: Validate certificate extensions
+        run: |-
+          cat > site.pp <<'EOF'
+          node default {
+            notify { "Trusted Facts":
+              message => $trusted,
+            }
+            if $trusted.dig('extensions', 'pp_role') != 'tomato' {
+              fail("Certificate extension 'pp_role' should be 'tomato'. trusted['extensions'] = ${trusted['extensions']}")
+            }
+          }
+          EOF
+          bolt file upload site.pp /etc/puppetlabs/code/environments/production/manifests/site.pp --inventory inventory.yaml --targets test-primary-1
+          bolt command run '/opt/puppetlabs/bin/puppet agent --agent_disabled_lockfile=/tmp/not_locked.lock --onetime --verbose --no-daemonize' --inventory inventory.yaml --targets test-primary-1,test-agent-1 --stream
+      - name: Validate service state
+        run: |-
+          cat > apply.sh <<'EOF'
+          set -e
+          /opt/puppetlabs/bin/puppet apply --test -e 'service { "puppet": ensure => running, enable => false }'
+          EOF
+          # Use script rather than bolt apply so that we trip if the
+          # apply produces changes and returns an exitcode of 2.
+          bolt script run apply.sh --inventory inventory.yaml --targets test-agent-1,test-primary-1 --stream

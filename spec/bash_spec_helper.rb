@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'json'
 require 'tmpdir'
 require 'rspec'
 require 'lib/bash_rspec'

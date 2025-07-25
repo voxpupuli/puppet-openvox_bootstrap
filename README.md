@@ -74,6 +74,60 @@ bolt task run openvox_bootstrap::install_build_artifact \
   --run-as root
 ```
 
+### openvox_bootstrap::configure
+
+The openvox_bootstrap::configure task can be used to provide very
+basic initial configuration for the openvox agent.
+
+It does not install the agent. Run openvox_bootstrap::install first.
+Since the agent service is installed stopped, configuration can
+be laid down before the first run begins the certificate request
+process.
+
+It provides the following support:
+
+* laying down an initial puppet.conf (primary use case being to set
+  the [server] parameter to point to the openvox-server).
+* creating a [csr_attributes.yaml] file for the agent to use when
+  generating a CSR for use with autosigning scripts and to provide
+  extension data to the generated certificate.
+* ensuring the `puppet` service is in a preferred state.
+
+NOTE: the csr_attributes.yaml will overwrite any pre-existing files,
+but settings for puppet.conf will be merged into an existing file if
+present.
+
+With an example params.json file like this:
+
+```json
+{
+  "puppet_conf": {
+     "main": {
+        "server": "puppetserver.foo"
+     }
+  },
+  "csr_attributes": {
+     "custom_attributes": {
+        "1.2.840.113549.1.9.7": "password"
+     },
+     "extension_requests": {
+        "pp_role": "thing1"
+     }
+  },
+  "puppet_service_running": true,
+  "puppet_service_enabled": true
+}
+```
+
+You can run the task like this:
+
+```sh
+bolt task run openvox_bootstrap::configure \
+  --targets <target> \
+  --params @params.json \
+  --run-as root
+```
+
 ## Reference
 
 See [REFERENCE.md](./REFERENCE.md) for the generated reference doc.
@@ -117,3 +171,5 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 [puppet_agent::install tasks]: https://github.com/puppetlabs/puppetlabs-puppet_agent/tree/main?tab=readme-ov-file#puppet_agentinstall
 [apply_prep]: https://www.puppet.com/docs/bolt/latest/plan_functions#apply-prep
 [puppet_library]: https://www.puppet.com/docs/bolt/latest/using_plugins#puppet-library-plugins
+[server]: https://github.com/puppetlabs/puppet/blob/main/references/configuration.md#server
+[csr_attributes.yaml]: https://help.puppet.com/core/current/Content/PuppetCore/config_file_csr_attributes.htm

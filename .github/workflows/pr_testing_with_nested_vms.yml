@@ -12,6 +12,7 @@ on:
 jobs:
   test-install-task:
     strategy:
+      fail-fast: false
       matrix:
         os:
           - [almalinux, '8']

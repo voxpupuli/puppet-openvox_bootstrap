@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
+## [v1.0.0](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v1.0.0) (2025-08-04)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/v0.4.0...v1.0.0)
+
+**Breaking changes:**
+
+- Drop puppet, update openvox minimum version to 8.19 [\#31](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/31) ([TheMeier](https://github.com/TheMeier))
+
+**Merged pull requests:**
+
+- \(maint\) Drop debian-10 from testing matrix [\#28](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/28) ([jpartlow](https://github.com/jpartlow))
+- Configure openvox [\#27](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/27) ([jpartlow](https://github.com/jpartlow))
+
 ## [v0.4.0](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v0.4.0) (2025-07-04)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/v0.3.3...v0.4.0)

@@ -24,6 +24,11 @@
       "description": "The yum source repository to retrieve rpm packages from.",
       "type": "Optional[String]",
       "default": "https://yum.voxpupuli.org"
+    },
+    "stop_service": {
+      "description": "Whether to stop the given service after install. (Requires puppet on the system.)",
+      "type": "Optional[Boolean]",
+      "default": false
     }
   },
   "implementations": [

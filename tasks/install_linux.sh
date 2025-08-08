@@ -9,6 +9,7 @@ version=${PT_version:-latest}
 collection=${PT_collection:-openvox8}
 yum_source=${PT_yum_source:-https://yum.voxpupuli.org}
 apt_source=${PT_apt_source:-https://apt.voxpupuli.org}
+stop_service=${PT_stop_service:-'false'}
 
 # shellcheck source=files/common.sh
 source "${PT__installdir}/openvox_bootstrap/files/common.sh"
@@ -75,5 +76,9 @@ download "${package_url}" "${local_release_package}"
 # The release package has the repository metadata needed to install
 # packages from the collection using the platform package manager.
 install_release_package "${local_release_package}"
-# Use the platform package manager to install openvox-agent
+# Use the platform package manager to install $package
 install_package "${package}" "${version}" "${os_family}" "${os_full_version}"
+# If a service stop is requested, stop the service now
+if [[ "${stop_service}" = 'true' ]]; then
+  stop_and_disable_service "${package}"
+fi

@@ -510,3 +510,43 @@ set_artifacts_package_url() {
   export package_url # quiets shellcheck SC2034
   assigned 'package_url'
 }
+
+# Stop and disable the service for the given package.
+#
+# Only intended to work for openvox-agent, openvoxdb and
+# openvox-server.
+#
+# Will fail if openvox isn't installed.
+#
+# (voxpupuli/puppet-openvox_bootstrap#35)
+# Implemented for integration with openbolt.
+stop_and_disable_service() {
+  local _package="$1"
+  # Using the full path here because openvox is installed into opt,
+  # and if we've just installed, the shell's PATH will not include it
+  # yet.
+  local _puppet="${2:-/opt/puppetlabs/bin/puppet}"
+
+  case "${_package}" in
+    openvox-agent)
+      local _service='puppet'
+      ;;
+    openvoxdb)
+      local _service='puppetdb'
+      ;;
+    openvox-server)
+      local _service='puppetserver'
+      ;;
+    *)
+      fail "Cannot stop service. Unknown service for package: '${_package}'"
+      ;;
+  esac
+
+  info "Stopping and disabling service '${_service}' for package '${_package}'"
+
+  if [ -x "${_puppet}" ]; then
+    exec_and_capture "${_puppet}" resource service "${_service}" ensure=stopped enable=false
+  else
+    fail "Puppet executable not found at '${_puppet}'. Cannot stop and disable service '${_service}'."
+  fi
+}

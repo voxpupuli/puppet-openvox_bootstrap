@@ -70,3 +70,64 @@ jobs:
       - name: Verify openvox-agent is installed
         run: |-
           bolt task run openvox_bootstrap::check version=8 test=gt --inventory inventory.yaml --targets test-agent-1
+
+  # The rockylinux containers aren't set up for interacting with systemd
+  # so using nested_vms for this test.
+  test-install-and-stop:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - [debian, '12']
+          - [rocky, '9']
+          - [ubuntu, '24.04']
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - id: install-bolt
+        uses: ./.github/actions/bolt
+        with:
+          os-codename: jammy
+      - id: vm-cluster
+        uses: jpartlow/nested_vms@v1
+        with:
+          os: ${{ matrix.os[0] }}
+          os-version: ${{ matrix.os[1] }}
+          os-arch: ${{ matrix.os[2] || 'x86_64' }}
+          image_version: ${{ matrix.os[3] }}
+          host-root-access: true
+          ruby-version: '3.3'
+          install-openvox: false
+          # Note: the cpu_mode is set to host-model for the sake of
+          # el-9 which expects at least x86_64-2 arch. This depends on
+          # the runner's architecture being sufficient, and there is
+          # probably a better way to get this set on the libvirt
+          # domain instead.
+          vms: |-
+            [
+              {
+                "role": "agent",
+                "count": 1,
+                "cpus": 2,
+                "mem_mb": 4096,
+                "cpu_mode": "host-model"
+              }
+            ]
+      - name: Capture dereferenced inventory for use with openvox_bootstrap
+        working-directory: kvm_automation_tooling
+        run: |-
+          bolt inventory --inventory terraform/instances/inventory.test.yaml show --format json --detail | \
+            jq '.inventory | with_entries(select(.key == "targets")) | del(.targets[0].groups)' | \
+            yq -P > ../inventory.yaml
+      - name: Run openvox_bootstrap::install task on nested vm
+        run: |-
+          bolt task run openvox_bootstrap::install --inventory inventory.yaml --targets test-agent-1 stop_service=true
+      - name: Verify openvox-agent is installed
+        run: |-
+          bolt task run openvox_bootstrap::check version=8 test=gt --inventory inventory.yaml --targets test-agent-1
+      - name: Verify service state
+        run: |-
+          set -e
+          bolt command run '/opt/puppetlabs/bin/puppet resource service openvox-agent' --inventory inventory.yaml --targets test-agent-1 > service.state
+          grep -E "ensure [ ]*=> [ ]*'stopped'" service.state
+          grep -E "enable [ ]*=> [ ]*'false'" service.state

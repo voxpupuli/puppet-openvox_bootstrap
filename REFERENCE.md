@@ -123,7 +123,7 @@ Installs an openvox package. By default, this will be the latest openvox-agent f
 
 ##### `package`
 
-Data type: `String[1]`
+Data type: `Optional[String]`
 
 The name of the package to install.
 
@@ -131,7 +131,7 @@ The name of the package to install.
 
 Data type: `Optional[String]`
 
-The version of the openvox-agent package to install. Defaults to latest.
+The version of the openvox-agent package to install.
 
 ##### `collection`
 
@@ -150,6 +150,12 @@ The apt source repository to retrieve deb packages from.
 Data type: `Optional[String]`
 
 The yum source repository to retrieve rpm packages from.
+
+##### `stop_service`
+
+Data type: `Optional[Boolean]`
+
+Whether to stop the given service after install. (Requires puppet on the system.)
 
 ### <a name="install_build_artifact"></a>`install_build_artifact`
 

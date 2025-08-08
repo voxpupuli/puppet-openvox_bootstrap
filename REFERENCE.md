@@ -151,6 +151,12 @@ Data type: `Optional[String]`
 
 The yum source repository to retrieve rpm packages from.
 
+##### `stop_service`
+
+Data type: `Optional[Boolean]`
+
+Whether to stop the given service after install. (Requires puppet on the system.)
+
 ### <a name="install_build_artifact"></a>`install_build_artifact`
 
 Downloads and installs a package directly from the openvox build artifact server.

@@ -3,12 +3,13 @@
   "parameters": {
     "package": {
       "description": "The name of the package to install.",
-      "type": "String[1]",
+      "type": "Optional[String]",
       "default": "openvox-agent"
     },
     "version": {
-      "description": "The version of the openvox-agent package to install. Defaults to latest.",
-      "type": "Optional[String]"
+      "description": "The version of the openvox-agent package to install.",
+      "type": "Optional[String]",
+      "default": "latest"
     },
     "collection": {
       "description": "The openvox collection to install from.",

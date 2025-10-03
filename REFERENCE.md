@@ -37,11 +37,11 @@ Alias of
 ```puppet
 Struct[{
     Optional['custom_attributes']  => Hash[
-      Openvox_bootstrap::Oid,
+      Variant[Openvox_bootstrap::Oid,Openvox_bootstrap::Cer_short_names],
       String
     ],
     Optional['extension_requests'] => Hash[
-      Variant[Openvox_bootstrap::Oid,Openvox_bootstrap::Cer_short_names],
+      Openvox_bootstrap::Oid,
       String
     ],
   }]

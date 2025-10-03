@@ -133,10 +133,10 @@ describe 'openvox_bootstrap::configure' do
     let(:csr_attributes) do
       {
         'custom_attributes' => {
-          '1.2.840.113549.1.9.7' => 'bar',
+          'pp_role' => 'spec'
         },
         'extension_requests' => {
-          'pp_role' => 'spec'
+          '1.2.840.113549.1.9.7' => 'bar',
         }
       }
     end
@@ -145,9 +145,9 @@ describe 'openvox_bootstrap::configure' do
       <<~YAML
         ---
         custom_attributes:
-          1.2.840.113549.1.9.7: bar
-        extension_requests:
           pp_role: spec
+        extension_requests:
+          1.2.840.113549.1.9.7: bar
       YAML
     end
 

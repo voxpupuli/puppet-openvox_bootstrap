@@ -41,7 +41,7 @@ jobs:
         uses: ./.github/actions/bolt
         with:
           os-codename: ${{ matrix.os-details.codename }}
-      - name: Run openvox-agent install task
+      - name: Run install task for openvox-agent
         run: bolt task run openvox_bootstrap::install --targets localhost --run-as root
       - name: Verify openvox-agent is installed
         run: bolt task run openvox_bootstrap::check --targets localhost --run-as root
@@ -71,7 +71,7 @@ jobs:
           path: openvox_bootstrap
       - id: prep
         uses: ./openvox_bootstrap/.github/actions/container_task_prep
-      - name: Run openvox-agent install task manually
+      - name: Run install task manually for openvox-agent
         env:
           PT_collection: openvox8
         run: ./openvox_bootstrap/tasks/install_linux.sh
@@ -104,7 +104,7 @@ jobs:
           path: openvox_bootstrap
       - id: prep
         uses: ./openvox_bootstrap/.github/actions/container_task_prep
-      - name: Run openvox-agent install task manually
+      - name: Run install task manually for openvox-agent
         env:
           PT_version: "8.14.0"
         run: ./openvox_bootstrap/tasks/install_linux.sh
@@ -137,7 +137,7 @@ jobs:
           path: openvox_bootstrap
       - id: prep
         uses: ./openvox_bootstrap/.github/actions/container_task_prep
-      - name: Run openvox-agent install task manually
+      - name: Run install task manually for openvox-server
         env:
           PT_package: "openvox-server"
         run: ./openvox_bootstrap/tasks/install_linux.sh
@@ -168,7 +168,7 @@ jobs:
           path: openvox_bootstrap
       - id: prep
         uses: ./openvox_bootstrap/.github/actions/container_task_prep
-      - name: Run openvox-agent install task manually
+      - name: Run install task manually for openvox-server
         env:
           PT_package: "openvox-server"
           PT_version: "8.8.0"

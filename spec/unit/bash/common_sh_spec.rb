@@ -577,4 +577,48 @@ describe 'files/common.sh' do
       end
     end
   end
+
+  context 'stop_and_disable_service' do
+    it 'fails for an unknown package' do
+      output, status = test('stop_and_disable_service unknown-package')
+
+      expect(status.success?).to be(false)
+      expect(output.strip).to include("Unknown service for package: 'unknown-package'")
+    end
+
+    it 'fails if puppet executable not found' do
+      output, status = test('stop_and_disable_service openvox-agent /no/openvox')
+
+      expect(status.success?).to be(false)
+      expect(output.strip).to include("Puppet executable not found at '/no/openvox'")
+    end
+
+    context 'with puppet executable' do
+      let(:mock_puppet) { "#{tmpdir}/puppet" }
+
+      before do
+        # The little BashRspec lib isn't sophisticated enough
+        # to deal with an absolute path, so using this instead of
+        # allow_script.to receive_command(mock_puppet)...
+        File.write(mock_puppet, <<~EOF)
+          #!/bin/sh
+          echo "Stopping ${3} service"
+        EOF
+        File.chmod(0o755, mock_puppet)
+      end
+
+      [
+        %w[openvox-agent puppet],
+        %w[openvox-server puppetserver],
+        %w[openvoxdb puppetdb],
+      ].each do |package, service|
+        it "stops the #{service} service for #{package}" do
+          output, status = test("stop_and_disable_service #{package} #{mock_puppet}")
+
+          expect(status.success?).to be(true)
+          expect(output.strip).to include(service)
+        end
+      end
+    end
+  end
 end

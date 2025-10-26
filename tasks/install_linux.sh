@@ -14,6 +14,37 @@ stop_service=${PT_stop_service:-'false'}
 # shellcheck source=files/common.sh
 source "${PT__installdir}/openvox_bootstrap/files/common.sh"
 
+# This function will cause the script to exit if one of the conditions is met
+#
+# If the requested $version is
+#   1. latest and there is already an agent installed
+#   2. not latest, but $version matches the agent's version number
+skip_if_installed() {
+  # This logic only applies to the agent package because it enables
+  # OpenBolt's apply_prep logic to work properly
+  if [ "$package" == 'openvox-agent' ]; then
+    # Find agent version, if any
+    if [ -f /opt/puppetlabs/puppet/VERSION ]; then
+      installed_version=$(cat /opt/puppetlabs/puppet/VERSION)
+    elif command -v puppet >/dev/null 2>&1; then
+      installed_version=$(puppet --version)
+    else
+      installed_version=none
+    fi
+
+    if [ "$installed_version" != 'none' ]; then
+      if [ "$version" = 'latest' ]; then
+        info 'Specific agent version not requested and the agent was detected. Skipping install.'
+        exit 0
+      elif [ "$version" = "$installed_version" ]; then
+        # installed agent version matched specific version requested
+        info "Requested agent version $version. Found agent version $installed_version. Skipping install."
+        exit 0
+      fi
+    fi
+  fi
+}
+
 # Based on platform family set:
 #   repository - the package repository to download from
 set_repository() {
@@ -65,6 +96,8 @@ install_release_package() {
   refresh_package_cache
 }
 
+# quit early if nothing to do
+skip_if_installed
 # Get platform information
 set_platform_globals
 # Set collection release package url based on platform

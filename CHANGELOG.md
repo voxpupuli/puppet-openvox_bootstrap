@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
+## [v1.1.0](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v1.1.0) (2025-10-26)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/v1.0.0...v1.1.0)
+
+**Implemented enhancements:**
+
+- Configure openbox\_bootstrap as a puppet\_library bolt\_plugin [\#33](https://github.com/voxpupuli/puppet-openvox_bootstrap/issues/33)
+- Exit install early if nothing to do [\#42](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/42) ([austb](https://github.com/austb))
+
+**Closed issues:**
+
+- Add Feature to manage entries in csr\_attributes.yml [\#26](https://github.com/voxpupuli/puppet-openvox_bootstrap/issues/26)
+
+**Merged pull requests:**
+
+- \(gh-35\) Add a stop\_service parameter to install task [\#36](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/36) ([jpartlow](https://github.com/jpartlow))
+- \(gh-33\) Configure openbox\_boostrap as a puppet\_library bolt plugin [\#34](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/34) ([jpartlow](https://github.com/jpartlow))
+
 ## [v1.0.0](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v1.0.0) (2025-08-04)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/v0.4.0...v1.0.0)

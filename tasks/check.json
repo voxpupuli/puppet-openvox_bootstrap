@@ -29,6 +29,10 @@
         "openvox_bootstrap/lib/openvox_bootstrap/task.rb",
         "openvox_bootstrap/tasks/check.rb"
       ]
+    },
+    {
+      "name": "check_windows.ps1",
+      "requirements": ["powershell"]
     }
   ]
 }

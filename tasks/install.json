@@ -40,6 +40,10 @@
         "facts/tasks/bash.sh",
         "openvox_bootstrap/files/common.sh"
       ]
+    },
+    {
+      "name": "install_windows.ps1",
+      "requirements": ["powershell"]
     }
   ]
 }

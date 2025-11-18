@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
+## [Unreleased](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/HEAD)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/v1.1.0...HEAD)
+
+**Implemented enhancements:**
+
+- Add Windows support for install and check tasks [\#44](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/44) ([austb](https://github.com/austb))
+
 ## [v1.1.0](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v1.1.0) (2025-10-26)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/v1.0.0...v1.1.0)

@@ -473,6 +473,14 @@ set_artifacts_package_url() {
   local _package="$2"
   local _version="$3"
 
+  # When installing a snapshot build of an ezbake project,
+  # the release number is not included in the file name where it is
+  # on tagged versions.
+  local _release="-1"
+  if [[ "${_version}" =~ "SNAPSHOT" ]];then
+          _release=""
+  fi
+
   set_package_type "${os_family}"
   set_package_architecture "${_package}" "${os_family}"
 
@@ -484,10 +492,10 @@ set_artifacts_package_url() {
       else
         _os_family="${os_family}"
       fi
-      package_name="${_package}-${_version}-1.${_os_family}${os_major_version}.${package_arch}.${package_type}"
+      package_name="${_package}-${_version}${_release}.${_os_family}${os_major_version}.${package_arch}.${package_type}"
       ;;
     deb)
-      package_name="${_package}_${_version}-1%2B${os_family}${os_full_version}_${package_arch}.${package_type}"
+      package_name="${_package}_${_version}${_release}%2B${os_family}${os_full_version}_${package_arch}.${package_type}"
       ;;
     *)
       fail "Unhandled package type: '${package_type}'"

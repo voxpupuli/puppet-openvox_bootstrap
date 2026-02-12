@@ -223,7 +223,8 @@ install_package_file() {
   info "Installing release package '${_package_file}' of type '${_package_type}'"
   case $_package_type in
     rpm)
-      dnf install --assumeyes "$_package_file"
+      # can switch to dnf when we drop amazon 2 support
+      yum install --assumeyes "$_package_file"
       ;;
     deb)
       apt install --yes "$_package_file"

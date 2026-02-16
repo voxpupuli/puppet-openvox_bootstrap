@@ -84,21 +84,8 @@ jobs:
             version: 8.9.0
         details:
           - image: almalinux:9
-            prereqs:
-              - java-17-openjdk-headless
-              - net-tools
-              - procps-ng
-              - which
           - image: debian:12
-            prereqs:
-              - openjdk-17-jre-headless
-              - net-tools
-              - procps
           - image: ubuntu:24.04
-            prereqs:
-              - openjdk-17-jre-headless
-              - net-tools
-              - procps
     runs-on: ubuntu-latest
     container: ${{ matrix.details.image }}
     steps:
@@ -112,28 +99,13 @@ jobs:
           PT__installdir: ${{ github.workspace }}
           PT_version: "8.19.1"
         run: ./openvox_bootstrap/tasks/install_build_artifact_linux.sh
-      - name: Install prerequisites
-        shell: bash
-        env:
-          PREREQ_PACKAGES: ${{ join(matrix.details.prereqs, ',') }}
-        run: |-
-          set +e
-          /opt/puppetlabs/bin/puppet apply --detailed-exitcodes <<EOS
-          package { [${PREREQ_PACKAGES}]:
-            ensure => installed
-          }
-          EOS
-          exitcode=$?
-          set -e
-          # Expect package changes and no failures.
-          [[ "${exitcode}" -eq 2 ]]
       - name: Test noarch package installation
         env:
           PT__installdir: ${{ github.workspace }}
           PT_package: ${{ matrix.package.name }}
           PT_version: ${{ matrix.package.version }}
         run: ./openvox_bootstrap/tasks/install_build_artifact_linux.sh
-      - name: Verify openvox-server is installed
+      - name: Verify openvox server component  is installed
         shell: bash
         env:
           PACKAGE: ${{ matrix.package.name }}

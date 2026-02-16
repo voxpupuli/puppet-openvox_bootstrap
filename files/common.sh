@@ -65,75 +65,6 @@ exec_and_capture() {
   return $LAST_EXEC_AND_CAPTURE_STATUS
 }
 
-# If the passed command fails with output matching the given regex,
-# retry the command after delay up to given number of retries.
-#
-# Aborts retries if the command fails but output does not match the
-# given error regex.
-#
-# Returns the status of the last executed command.
-#
-# Args:
-#  $1 - retry count
-#  $2 - delay in seconds
-#  $3 - regex to match against command output
-#  Remaining args - command to execute
-with_retries_if() {
-  local _retries="$1"
-  local _delay="$2"
-  local _error_regex="$3"
-  shift 3
-
-  local _cmd="$*"
-  local _result
-  local _status
-
-  for ((i = 1; i <= _retries; i++)); do
-    if [[ $i -gt 1 ]]; then
-      info "Retrying in ${_delay} seconds..."
-      sleep "${_delay}"
-    fi
-
-    info "Attempt ${i} of $_retries: ${_cmd}"
-
-    if exec_and_capture "${_cmd}"; then
-      _status=$LAST_EXEC_AND_CAPTURE_STATUS
-      break # command succeeded
-    else
-      _result="${LAST_EXEC_AND_CAPTURE_OUTPUT}"
-      _status=$LAST_EXEC_AND_CAPTURE_STATUS
-      if ! [[ "${_result}" =~ ${_error_regex} ]]; then
-        info "Command failed but output did not match /${_error_regex}/. Aborting retries."
-        break
-      fi
-    fi
-  done
-
-  return "${_status}"
-}
-
-# Retries an rpm command if it fails with output that matches an rpm
-# lock error (rpm running in another process).
-#
-# All arguments given to the function are passed to the rpm command.
-#
-# NOTE: The higher level package managers (dnf, yum, apt, etc.)
-# already manage lock waits. This function is only used for the
-# specific case of manually installing the release package, which
-# can collide with other uses of rpm during vm initialization, for
-# example.
-rpm_with_retries() {
-  with_retries_if 5 5 'error.*rpm.*lock' rpm "$@"
-}
-
-# Varient of rpm_with_retries for dpkg.
-#
-# (I haven't seen a dpkg lock failure in CI, but the mechanism for
-# failure is the same.)
-dpkg_with_retries() {
-  with_retries_if 5 5 'error.*dpkg.*lock' dpkg "$@"
-}
-
 # Download the given url to the given local file path.
 download() {
   local _url="$1"
@@ -292,10 +223,11 @@ install_package_file() {
   info "Installing release package '${_package_file}' of type '${_package_type}'"
   case $_package_type in
     rpm)
-      rpm_with_retries -Uvh --replacepkgs "$_package_file"
+      # can switch to dnf when we drop amazon 2 support
+      yum install --assumeyes "$_package_file"
       ;;
     deb)
-      dpkg_with_retries -i "$_package_file"
+      apt install --yes "$_package_file"
       ;;
     *)
       fail "Unhandled package type: '${package_type}'"

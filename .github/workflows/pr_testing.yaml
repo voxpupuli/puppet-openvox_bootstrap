@@ -27,20 +27,17 @@ jobs:
   test-install-task-on-ubuntu:
     strategy:
       matrix:
-        os-details:
-          - os: ubuntu-22.04
-            codename: jammy
-    #      - os: ubuntu-24.04
-    #        codename: noble
-    # Perforce hasn't yet released bolt on 24.04.
-    runs-on: ${{ matrix.os-details.os }}
+        os-version:
+          - 22.04
+          - 24.04
+    runs-on: ${{ format('ubuntu-{0}', matrix.os-version) }}
     needs: shellcheck
     steps:
       - uses: actions/checkout@v4
       - id: install-bolt
         uses: ./.github/actions/bolt
         with:
-          os-codename: ${{ matrix.os-details.codename }}
+          os-version: ${{ matrix.os-version }}
       - name: Run install task for openvox-agent
         run: bolt task run openvox_bootstrap::install --targets localhost --run-as root
       - name: Verify openvox-agent is installed
@@ -59,7 +56,6 @@ jobs:
           - debian:11
           - debian:12
           - fedora:42
-          - ubuntu:24.04
           # Need to pull in the repo GPG keys for sles
           #          - registry.suse.com/suse/sle15:15.6
     needs: shellcheck

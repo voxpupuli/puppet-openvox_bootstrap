@@ -31,13 +31,13 @@ jobs:
         os:
           - [almalinux, '9']
           - [ubuntu, '24.04']
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - id: install-bolt
         uses: ./.github/actions/bolt
         with:
-          os-codename: jammy
+          os-version: 24.04
       - id: vm-cluster
         uses: jpartlow/nested_vms@v1
         with:

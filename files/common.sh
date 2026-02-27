@@ -53,11 +53,17 @@ exists() {
 exec_and_capture() {
   info "Executing: $*"
 
+  local _restore_errexit=false
+  if [[ "$-" == *e* ]]; then
+    _restore_errexit=true
+  fi
 
   set +e
   LAST_EXEC_AND_CAPTURE_OUTPUT=$("$@" 2>&1)
   LAST_EXEC_AND_CAPTURE_STATUS=$?
-  set -e
+  if ${_restore_errexit}; then
+    set -e
+  fi
 
   echo "${LAST_EXEC_AND_CAPTURE_OUTPUT}"
   info "Status: ${LAST_EXEC_AND_CAPTURE_STATUS}"

@@ -139,6 +139,25 @@ describe 'files/common.sh' do
       expect(output).to include('arg1=hello world')
       expect(output).to include('arg2=foo bar')
     end
+
+    it 'preserves errexit behavior' do
+      output, status = test(<<~EOS)
+        set -e
+        fail() {
+          echo "failing"
+          return 1
+        }
+        exec_and_capture fail
+        echo "This should not be printed"
+      EOS
+
+      expect(status.success?).to be(false)
+      expect(output).to eq(<<~EOS)
+        ts [INFO]: Executing: fail
+        failing
+        ts [INFO]: Status: 1
+      EOS
+    end
   end
 
   context 'download()' do

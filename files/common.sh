@@ -219,6 +219,40 @@ get_deb_package_version() {
   echo -n "${_package_version}"
 }
 
+# Install an rpm package, either from a local file or from the
+# repository using the best available package manager interface.
+#
+# In descending preference, checks for dnf, yum and zypper.
+#
+# Downgrades are implicitly accepted when dnf/yum are used and a
+# version is specified. I'm not certain about zypper's behavior yet.
+install_rpm() {
+  if exists 'dnf'; then
+    exec_and_capture dnf install --assumeyes "$@"
+  elif exists 'yum'; then
+    exec_and_capture yum install --assumeyes "$@"
+  elif exists 'zypper'; then
+    exec_and_capture zypper install --non-interactive "$@"
+  else
+    fail "Unable to install $*. Neither dnf, yum nor zypper are installed."
+  fi
+}
+
+# Install a deb package, either from a local file or from the
+# repository using the best available package manager interface.
+#
+# Prefers apt-get to apt, since apt is really meant for interactive
+# use.
+install_deb() {
+  if exists 'apt-get'; then
+    exec_and_capture apt-get install --yes "$@"
+  elif exists 'apt'; then
+    exec_and_capture apt install --yes "$@"
+  else
+    fail "Unable to install $*. Neither apt nor apt-get are installed."
+  fi
+}
+
 # Install a local rpm or deb package file.
 install_package_file() {
   local _package_file="$1"
@@ -229,10 +263,17 @@ install_package_file() {
   case $_package_type in
     rpm)
       # can switch to dnf when we drop amazon 2 support
-      yum install --assumeyes "$_package_file"
+      install_rpm "$_package_file"
       ;;
     deb)
-      apt install --yes "$_package_file"
+      # Specifying --allow-downgrades here avoids an irritating bug
+      # with apt where the openvox-agent pins in the openvox release
+      # package seemingly cause a repeat call of `apt-get install
+      # ./local.rpm` to fail due to apt considering it a downgrade
+      # despite the version being identical. This was a problem for
+      # idempotency of install_build_artifact task calls when the
+      # release package was also installed.
+      install_deb --allow-downgrades "$_package_file"
       ;;
     *)
       fail "Unhandled package type: '${package_type}'"
@@ -257,10 +298,15 @@ install_package() {
     _os_full_version="${os_full_version}"
   fi
 
+  local _allow_downgrades
   local _package_and_version
   if [[ -n "${_version}" ]] && [[ "${_version}" != 'latest' ]]; then
     case $_os_family in
       debian|ubuntu)
+        # dnf/yum implicitly allow downgrades when a version is
+        # specified, but apt/apt-get do not, so we need to explicitly
+        # specify that here.
+        _allow_downgrades='--allow-downgrades'
         local _deb_package_version
         _deb_package_version=$(get_deb_package_version "${_version}" "${_os_family}" "${_os_full_version}")
         _package_and_version="${_package}=${_deb_package_version}"
@@ -275,24 +321,16 @@ install_package() {
 
   case ${_os_family} in
     debian|ubuntu)
-      if exists 'apt-get'; then
-        exec_and_capture apt-get install -y "${_package_and_version}"
-      elif exists 'apt'; then
-        exec_and_capture apt install -y "${_package_and_version}"
-      else
-        fail "Unable to install ${_package}. Neither apt nor apt-get are installed."
-      fi
+      # _allow_downgrades is unquoted here because it is either an
+      # empty string or the string '--allow-downgrades', and
+      # Shellcheck seems smart enough to recognize that this is ok.
+      # Leaving it unquoted prevents it from being passed as an empty
+      # argument when it is an empty string, and avoids an extra space
+      # when $* is evaluated.
+      install_deb ${_allow_downgrades} "${_package_and_version}"
       ;;
     *)
-      if exists 'dnf'; then
-        exec_and_capture dnf install -y "${_package_and_version}"
-      elif exists 'yum'; then
-        exec_and_capture yum install -y "${_package_and_version}"
-      elif exists 'zypper'; then
-        exec_and_capture zypper install -y "${_package_and_version}"
-      else
-        fail "Unable to install ${_package}. Neither dnf, yum nor zypper are installed."
-      fi
+      install_rpm "${_package_and_version}"
       ;;
   esac
 }

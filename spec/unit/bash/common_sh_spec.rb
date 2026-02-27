@@ -253,7 +253,7 @@ describe 'files/common.sh' do
       it 'installs a package' do
         output, status = test('install_package foo')
 
-        expect(output).to include('apt-get given: install -y foo')
+        expect(output).to include('apt-get given: install --yes foo')
         expect(status.success?).to be(true)
       end
 
@@ -261,14 +261,14 @@ describe 'files/common.sh' do
         output, status = test('install_package foo 1.2.3')
 
         expect(status.success?).to be(true)
-        expect(output).to include('apt-get given: install -y foo=1.2.3-1+ubuntu24.04')
+        expect(output).to include('apt-get given: install --yes --allow-downgrades foo=1.2.3-1+ubuntu24.04')
       end
 
       it 'installs a deb with full package version given' do
         output, status = test('install_package foo 1.2.3-1something')
 
         expect(status.success?).to be(true)
-        expect(output).to include('apt-get given: install -y foo=1.2.3-1something')
+        expect(output).to include('apt-get given: install --yes --allow-downgrades foo=1.2.3-1something')
       end
 
       it 'fails if package manager fails' do
@@ -283,14 +283,14 @@ describe 'files/common.sh' do
         expect(output).to include('apt-get failed')
       end
 
-      it 'falls back to apt-get' do
+      it 'falls back to apt' do
         behave_as_if_command_does_not_exist('apt-get')
         allow_script.to receive_command(:apt).and_exec('echo "apt given: $*"')
 
         output, status = test('install_package foo')
 
         expect(status.success?).to be(true)
-        expect(output).to include('apt given: install -y foo')
+        expect(output).to include('apt given: install --yes foo')
       end
 
       it 'fails if neither apt nor apt-get are available' do
@@ -316,14 +316,14 @@ describe 'files/common.sh' do
         output, status = test('install_package foo')
 
         expect(status.success?).to be(true)
-        expect(output).to include('dnf given: install -y foo')
+        expect(output).to include('dnf given: install --assumeyes foo')
       end
 
       it 'installs a package with a version' do
         output, status = test('install_package foo 1.2.3')
 
         expect(status.success?).to be(true)
-        expect(output).to include('dnf given: install -y foo-1.2.3')
+        expect(output).to include('dnf given: install --assumeyes foo-1.2.3')
       end
 
       it 'fails if package manager fails' do
@@ -345,7 +345,7 @@ describe 'files/common.sh' do
         output, status = test('install_package foo')
 
         expect(status.success?).to be(true)
-        expect(output).to include('yum given: install -y foo')
+        expect(output).to include('yum given: install --assumeyes foo')
       end
 
       it 'fails if dnf, yum and zypper are all unavailable' do

@@ -125,6 +125,20 @@ describe 'files/common.sh' do
         LAST_EXEC_AND_CAPTURE_STATUS=0
       EOS
     end
+
+    it 'preserves arguments with spaces' do
+      output, status = test(<<~EOS)
+        check_args() {
+          echo "arg1=$1"
+          echo "arg2=$2"
+        }
+        exec_and_capture check_args "hello world" "foo bar"
+      EOS
+
+      expect(status.success?).to be(true)
+      expect(output).to include('arg1=hello world')
+      expect(output).to include('arg2=foo bar')
+    end
   end
 
   context 'download()' do

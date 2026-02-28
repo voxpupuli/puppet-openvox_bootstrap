@@ -176,3 +176,45 @@ jobs:
           PT_package: "openvox-server"
           PT_version: "8.8.0"
         run: ./openvox_bootstrap/tasks/install_linux.sh
+
+  test-downgrade:
+    strategy:
+      matrix:
+        image:
+          - almalinux:8
+          - almalinux:9
+          - rockylinux:8
+          - rockylinux:9
+          - debian:11
+          - debian:12
+          - fedora:43
+          # Need to pull in the repo GPG keys for sles
+          #          - registry.suse.com/suse/sle15:15.6
+    needs: shellcheck
+    runs-on: ubuntu-latest
+    container: ${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: openvox_bootstrap
+      - id: prep
+        uses: ./openvox_bootstrap/.github/actions/container_task_prep
+      - name: Install latest agent
+        env:
+          PT_collection: openvox8
+        run: ./openvox_bootstrap/tasks/install_linux.sh
+      - name: Verify later openvox-agent is installed
+        env:
+          PT_version: '8.18.0'
+          PT_test: 'gt'
+        run: ./openvox_bootstrap/tasks/check_linux.sh
+      - name: Install older version of agent
+        shell: bash
+        env:
+          PT_collection: openvox8
+          PT_version: "8.18.0"
+        run: ./openvox_bootstrap/tasks/install_linux.sh
+      - name: Verify openvox-agent is downgraded
+        env:
+          PT_version: "8.18.0"
+        run: ./openvox_bootstrap/tasks/check_linux.sh

@@ -110,3 +110,48 @@ jobs:
           /opt/puppetlabs/bin/puppet resource package "${PACKAGE}" > openvox-package.status
           cat openvox-package.status
           grep "ensure.*=>.*'${VERSION}" openvox-package.status
+
+  test-downgrade:
+    strategy:
+      matrix:
+        image:
+          - almalinux:8
+          - almalinux:9
+          - almalinux:10
+          - rockylinux:8
+          - rockylinux:9
+          - rockylinux/rockylinux:10
+          - debian:11
+          - debian:12
+          - debian:13
+          - fedora:43
+          # Need to pull in the repo GPG keys for sles
+          #          - registry.suse.com/suse/sle15:15.6
+    runs-on: ubuntu-latest
+    container: ${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: openvox_bootstrap
+      - id: prep
+        uses: ./openvox_bootstrap/.github/actions/container_task_prep
+      - name: Run openvox-agent install task manually
+        env:
+          PT__installdir: ${{ github.workspace }}
+          PT_version: "8.25.0"
+        run: ./openvox_bootstrap/tasks/install_build_artifact_linux.sh
+      - name: Verify openvox-agent is installed
+        env:
+          PT__installdir: ${{ github.workspace }}
+          PT_version: "8.25.0"
+        run: ./openvox_bootstrap/tasks/check_linux.sh
+      - name: Install older version of agent
+        env:
+          PT__installdir: ${{ github.workspace }}
+          PT_version: "8.18.0"
+        run: ./openvox_bootstrap/tasks/install_build_artifact_linux.sh
+      - name: Verify openvox-agent is downgraded
+        env:
+          PT__installdir: ${{ github.workspace }}
+          PT_version: "8.18.0"
+        run: ./openvox_bootstrap/tasks/check_linux.sh

@@ -36,11 +36,14 @@ jobs:
         image:
           - almalinux:8
           - almalinux:9
+          - almalinux:10
           - rockylinux:8
           - rockylinux:9
+          - rockylinux/rockylinux:10
           - debian:11
           - debian:12
-          - fedora:42
+          - debian:13
+          - fedora:43
           # Need to pull in the repo GPG keys for sles
           #          - registry.suse.com/suse/sle15:15.6
     runs-on: ubuntu-latest
@@ -54,18 +57,17 @@ jobs:
       - name: Run openvox-agent install task manually
         env:
           PT__installdir: ${{ github.workspace }}
-          PT_version: "8.15.0"
+          PT_version: "8.18.0"
         run: ./openvox_bootstrap/tasks/install_build_artifact_linux.sh
       - name: Verify openvox-agent is installed
-        shell: bash
         env:
           PT__installdir: ${{ github.workspace }}
-          PT_version: "8.15.0"
+          PT_version: "8.18.0"
         run: ./openvox_bootstrap/tasks/check_linux.sh
       - name: Verify idempotency
         env:
           PT__installdir: ${{ github.workspace }}
-          PT_version: "8.15.0"
+          PT_version: "8.18.0"
         run: ./openvox_bootstrap/tasks/install_build_artifact_linux.sh
 
   test-install-build-artifact-task-noarch:
@@ -73,14 +75,14 @@ jobs:
       matrix:
         package:
           - name: openvox-server
-            version: 8.8.0
+            version: 8.12.1
           - name: openvoxdb
-            version: 8.9.0
+            version: 8.12.1
           - name: openvoxdb-termini
-            version: 8.9.0
+            version: 8.12.1
         details:
-          - image: almalinux:9
-          - image: debian:12
+          - image: almalinux:10
+          - image: debian:13
           - image: ubuntu:24.04
     runs-on: ubuntu-latest
     container: ${{ matrix.details.image }}
@@ -93,7 +95,7 @@ jobs:
       - name: Run openvox-agent install task manually
         env:
           PT__installdir: ${{ github.workspace }}
-          PT_version: "8.19.1"
+          PT_version: "8.21.1"
         run: ./openvox_bootstrap/tasks/install_build_artifact_linux.sh
       - name: Test noarch package installation
         env:
@@ -101,7 +103,7 @@ jobs:
           PT_package: ${{ matrix.package.name }}
           PT_version: ${{ matrix.package.version }}
         run: ./openvox_bootstrap/tasks/install_build_artifact_linux.sh
-      - name: Verify openvox server component  is installed
+      - name: Verify openvox server component is installed
         shell: bash
         env:
           PACKAGE: ${{ matrix.package.name }}

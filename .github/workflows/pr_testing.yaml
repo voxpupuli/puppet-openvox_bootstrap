@@ -51,11 +51,14 @@ jobs:
         image:
           - almalinux:8
           - almalinux:9
+          - almalinux:10
           - rockylinux:8
           - rockylinux:9
+          - rockylinux/rockylinux:10
           - debian:11
           - debian:12
-          - fedora:42
+          - debian:13
+          - fedora:43
           # Need to pull in the repo GPG keys for sles
           #          - registry.suse.com/suse/sle15:15.6
     needs: shellcheck
@@ -85,9 +88,9 @@ jobs:
     strategy:
       matrix:
         image:
-          - rockylinux:9
-          - fedora:41
-          - debian:12
+          - rockylinux/rockylinux:10
+          - fedora:43
+          - debian:13
           - ubuntu:24.04
           # Need to pull in the repo GPG keys for sles
           #          - registry.suse.com/suse/sle15:15.6
@@ -102,25 +105,25 @@ jobs:
         uses: ./openvox_bootstrap/.github/actions/container_task_prep
       - name: Run install task manually for openvox-agent
         env:
-          PT_version: "8.14.0"
+          PT_version: "8.18.0"
         run: ./openvox_bootstrap/tasks/install_linux.sh
       - name: Verify openvox-agent is installed
         env:
-          PT_version: "8.14.0"
+          PT_version: "8.18.0"
         run: ./openvox_bootstrap/tasks/check_linux.sh
       - name: Verify idempotency
         env:
-          PT_version: "8.14.0"
+          PT_version: "8.18.0"
         run: ./openvox_bootstrap/tasks/install_linux.sh
 
   test-install-package:
     strategy:
       matrix:
         image:
-          - rockylinux:9
+          - rockylinux/rockylinux:10
           # openvox-server not currently built for fedora
           #          - fedora:41
-          - debian:12
+          - debian:13
           - ubuntu:24.04
           # Need to pull in the repo GPG keys for sles
           #          - registry.suse.com/suse/sle15:15.6
@@ -148,10 +151,10 @@ jobs:
     strategy:
       matrix:
         image:
-          - rockylinux:9
+          - rockylinux/rockylinux:10
           # openvox-server not currently built for fedora
           #- fedora:41
-          - debian:12
+          - debian:13
           - ubuntu:24.04
           # Need to pull in the repo GPG keys for sles
           #          - registry.suse.com/suse/sle15:15.6
@@ -167,14 +170,14 @@ jobs:
       - name: Run install task manually for openvox-server
         env:
           PT_package: "openvox-server"
-          PT_version: "8.8.0"
+          PT_version: "8.12.0"
         run: ./openvox_bootstrap/tasks/install_linux.sh
       - name: Verify openvox-server is installed
-        run: /opt/puppetlabs/bin/puppetserver --version | grep '8.8.0'
+        run: /opt/puppetlabs/bin/puppetserver --version | grep '8.12.0'
       - name: Verify idempotency
         env:
           PT_package: "openvox-server"
-          PT_version: "8.8.0"
+          PT_version: "8.12.0"
         run: ./openvox_bootstrap/tasks/install_linux.sh
 
   test-downgrade:
@@ -183,10 +186,13 @@ jobs:
         image:
           - almalinux:8
           - almalinux:9
+          - almalinux:10
           - rockylinux:8
           - rockylinux:9
+          - rockylinux/rockylinux:10
           - debian:11
           - debian:12
+          - debian:13
           - fedora:43
           # Need to pull in the repo GPG keys for sles
           #          - registry.suse.com/suse/sle15:15.6

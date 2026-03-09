@@ -17,22 +17,24 @@ jobs:
         os:
           - [almalinux, '8']
           - [almalinux, '9']
+          - [almalinux, '10']
           - [debian, '11']
           - [debian, '12']
-          - [debian, '13', 'amd64', 'daily-latest']
+          - [debian, '13']
           - [rocky, '8']
           - [rocky, '9']
+          - [rocky, '10']
           - [ubuntu, '18.04']
           - [ubuntu, '20.04']
           - [ubuntu, '22.04']
           - [ubuntu, '24.04']
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - id: install-bolt
         uses: ./.github/actions/bolt
         with:
-          os-codename: jammy
+          os-version: 24.04
       - id: vm-cluster
         uses: jpartlow/nested_vms@v1
         with:
@@ -78,16 +80,16 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - [debian, '12']
-          - [rocky, '9']
+          - [debian, '13']
+          - [rocky, '10']
           - [ubuntu, '24.04']
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - id: install-bolt
         uses: ./.github/actions/bolt
         with:
-          os-codename: jammy
+          os-version: 24.04
       - id: vm-cluster
         uses: jpartlow/nested_vms@v1
         with:

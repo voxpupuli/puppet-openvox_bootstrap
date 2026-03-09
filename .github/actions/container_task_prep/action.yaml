@@ -5,6 +5,8 @@ description: "Checkouts module dependencies and ensures a wget is installed so t
 runs:
   using: "composite"
   steps:
+    # The basic facts shell script is sourced by install_package
+    # below to set platform globals.
     - uses: actions/checkout@v4
       with:
         repository: puppetlabs/puppetlabs-facts

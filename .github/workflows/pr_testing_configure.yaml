@@ -30,14 +30,16 @@ jobs:
       matrix:
         os:
           - [almalinux, '9']
+          - [rocky, '10']
+          - [debian, '13']
           - [ubuntu, '24.04']
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - id: install-bolt
         uses: ./.github/actions/bolt
         with:
-          os-codename: jammy
+          os-version: 24.04
       - id: vm-cluster
         uses: jpartlow/nested_vms@v1
         with:
@@ -107,7 +109,7 @@ jobs:
           set -e
           csr_pem=$(cat)
           csr_text=$(openssl req -text <<<"$csr_pem")
-          password=$(awk -F: -e '/challengePassword/ { print $2 }' <<<"$csr_text")
+          password=$(awk -F: -- '/challengePassword/ { print $2 }' <<<"$csr_text")
           [[ "${password}" == 'password' ]]
           EOF
           bolt file upload sign.sh /etc/puppetlabs/puppet/sign.sh --inventory inventory.yaml --targets test-primary-1
@@ -121,8 +123,7 @@ jobs:
           chown puppet:puppet /etc/puppetlabs/puppet/sign.sh
 
           set +e
-          systemctl start puppetserver
-          if [ $? -ne 0 ]; then
+          if ! systemctl start puppetserver; then
             cat /var/log/puppetlabs/puppetserver/puppetserver.log
             exit 1
           fi

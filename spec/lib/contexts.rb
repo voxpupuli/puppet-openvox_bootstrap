@@ -91,7 +91,7 @@ RSpec.shared_context 'bash_prep' do
     # write, or overwrite definition with new set of commands
     allow_script.to(
       redeclare(:exists).as(
-        <<~"EOF"
+        <<~"EOF",
           case $1 in
             #{bash_rspec_commands_that_do_not_exist.join('|')})
               return 1
@@ -101,7 +101,7 @@ RSpec.shared_context 'bash_prep' do
           esac
           original_exists $1
         EOF
-      )
+      ),
     )
   end
 

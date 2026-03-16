@@ -70,7 +70,7 @@ module OpenvoxBootstrap
           path: conf_path,
           contents: puppet_conf_contents,
           successful: success,
-        }
+        },
       }
       result[:puppet_conf][:errors] = errors if !success
       result
@@ -106,7 +106,7 @@ module OpenvoxBootstrap
           path: csr_attributes_path,
           contents: csr_attributes_contents,
           successful: true,
-        }
+        },
       }
     end
 
@@ -135,7 +135,7 @@ module OpenvoxBootstrap
           command: command.join(' '),
           output: output,
           successful: success,
-        }
+        },
       }
     end
 
@@ -150,7 +150,7 @@ module OpenvoxBootstrap
       results.merge!(update_puppet_conf(puppet_conf))
       results.merge!(write_csr_attributes(csr_attributes))
       results.merge!(
-        manage_puppet_service(puppet_service_running, puppet_service_enabled)
+        manage_puppet_service(puppet_service_running, puppet_service_enabled),
       )
 
       success = results.all? { |_, details| details[:successful] }

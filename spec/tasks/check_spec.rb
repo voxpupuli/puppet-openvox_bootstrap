@@ -14,13 +14,13 @@ describe 'openvox_bootstrap::check' do
 
     let(:input) do
       {
-        version: nil
+        version: nil,
       }
     end
     let(:expected_output) do
       {
         puppet_version: '8.0.0',
-        valid: true
+        valid: true,
       }
     end
 
@@ -74,9 +74,9 @@ describe 'openvox_bootstrap::check' do
               puppet_version: '8.0.0',
               valid: true,
               test: 'eq',
-              test_version: '8.0.0'
-            }
-          )
+              test_version: '8.0.0',
+            },
+          ),
         )
       end
 
@@ -87,9 +87,9 @@ describe 'openvox_bootstrap::check' do
               puppet_version: '8.0.0',
               valid: false,
               test: 'eq',
-              test_version: '8.0.1'
-            }
-          )
+              test_version: '8.0.1',
+            },
+          ),
         )
       end
     end
@@ -102,9 +102,9 @@ describe 'openvox_bootstrap::check' do
               puppet_version: '8.0.0',
               valid: true,
               test: 'ge',
-              test_version: '7.0.0'
-            }
-          )
+              test_version: '7.0.0',
+            },
+          ),
         )
       end
 
@@ -119,9 +119,9 @@ describe 'openvox_bootstrap::check' do
               puppet_version: '8.0.0',
               valid: false,
               test: 'ge',
-              test_version: '9.0.0'
-            }
-          )
+              test_version: '9.0.0',
+            },
+          ),
         )
       end
     end

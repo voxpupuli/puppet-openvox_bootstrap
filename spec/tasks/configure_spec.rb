@@ -51,8 +51,8 @@ describe 'openvox_bootstrap::configure' do
           'certname' => 'agent.spec',
         },
         'agent' => {
-          'environment' => 'test'
-        }
+          'environment' => 'test',
+        },
       }
     end
     let(:puppet_conf_path) { File.join(tmpdir, 'puppet.conf') }
@@ -65,16 +65,16 @@ describe 'openvox_bootstrap::configure' do
               path: puppet_conf_path,
               contents: '',
               successful: true,
-            }
-          }
-        )
+            },
+          },
+        ),
       )
       expect(puppet_config_set_calls).to eq(
         [
           ['main', 'server', 'puppet.spec'],
           ['main', 'certname', 'agent.spec'],
           ['agent', 'environment', 'test'],
-        ]
+        ],
       )
     end
 
@@ -95,9 +95,9 @@ describe 'openvox_bootstrap::configure' do
               errors: {
                 '--section=main oops=fail' => 'error output',
               },
-            }
-          }
-        )
+            },
+          },
+        ),
       )
     end
   end
@@ -136,8 +136,8 @@ describe 'openvox_bootstrap::configure' do
           '1.2.840.113549.1.9.7' => 'bar',
         },
         'extension_requests' => {
-          'pp_role' => 'spec'
-        }
+          'pp_role' => 'spec',
+        },
       }
     end
     let(:csr_attributes_path) { File.join(tmpdir, 'csr_attributes.yaml') }
@@ -159,9 +159,9 @@ describe 'openvox_bootstrap::configure' do
               path: csr_attributes_path,
               contents: csr_attributes_contents,
               successful: true,
-            }
-          }
-        )
+            },
+          },
+        ),
       )
       expect(File.read(csr_attributes_path)).to eq(csr_attributes_contents)
       expect(File.stat(csr_attributes_path).mode & 0o777).to eq(0o640)
@@ -194,8 +194,8 @@ describe 'openvox_bootstrap::configure' do
             command: command.join(' '),
             output: 'applied',
             successful: true,
-          }
-        }
+          },
+        },
       )
     end
 
@@ -221,7 +221,7 @@ describe 'openvox_bootstrap::configure' do
       expect(task.task).to eq(
         {
           puppet_service: { successful: true },
-        }
+        },
       )
     end
 
@@ -235,26 +235,26 @@ describe 'openvox_bootstrap::configure' do
           csr_attributes: { successful: true },
           puppet_conf: { successful: true },
           puppet_service: { successful: true },
-        }
+        },
       )
     end
 
     it 'prints results and exits 1 if puppet service fails' do
       expect(task).to(
-        receive(:manage_puppet_service).
-        and_return(
+        receive(:manage_puppet_service)
+        .and_return(
           {
             puppet_service: {
               successful: false,
               output: "apply failed\n",
-            }
-          }
-        )
+            },
+          },
+        ),
       )
 
       expect { task.task }.to(
         raise_error(SystemExit).and(
-          output(<<~EOM).to_stdout
+          output(<<~EOM).to_stdout,
             {
               "puppet_service": {
                 "successful": false,
@@ -266,27 +266,27 @@ describe 'openvox_bootstrap::configure' do
 
             apply failed
           EOM
-        ).and(output('').to_stderr)
+        ).and(output('').to_stderr),
       )
     end
 
     it 'prints results and exits 1 if any step fails' do
       expect(task).to receive(:manage_puppet_service).and_return({ puppet_service: { successful: true } })
       expect(task).to(
-        receive(:update_puppet_conf).
-        and_return(
+        receive(:update_puppet_conf)
+        .and_return(
           {
             puppet_conf: {
               successful: false,
-              errors: { '--section=main server=puppet.spec' => 'error output' }
-            }
-          }
-        )
+              errors: { '--section=main server=puppet.spec' => 'error output' },
+            },
+          },
+        ),
       )
 
       expect { task.task }.to(
         raise_error(SystemExit).and(
-          output(<<~EOM).to_stdout
+          output(<<~EOM).to_stdout,
             {
               "puppet_conf": {
                 "successful": false,
@@ -303,7 +303,7 @@ describe 'openvox_bootstrap::configure' do
 
             {"--section=main server=puppet.spec"=>"error output"}
           EOM
-        ).and(output('').to_stderr)
+        ).and(output('').to_stderr),
       )
     end
   end

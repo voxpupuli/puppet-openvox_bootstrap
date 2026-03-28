@@ -32,6 +32,7 @@ jobs:
 
   test-install-build-artifact-task-on-other-os-via-containers:
     strategy:
+      fail-fast: false
       matrix:
         image:
           - almalinux:8

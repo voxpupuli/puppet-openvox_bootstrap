@@ -26,6 +26,7 @@ jobs:
 
   test-install-task-on-ubuntu:
     strategy:
+      fail-fast: false
       matrix:
         os-version:
           - 22.04

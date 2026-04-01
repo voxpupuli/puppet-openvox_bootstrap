@@ -45,6 +45,14 @@ jobs:
         run: bolt task run openvox_bootstrap::check --targets localhost --run-as root
       - name: Verify idempotency
         run: bolt task run openvox_bootstrap::install --targets localhost --run-as root
+      - name: Verify that check task can provide a negative result
+        run: |-
+          if bolt task run openvox_bootstrap::check --targets localhost --run-as root version=8 test=lt; then
+            echo "Check task should have failed version test but did not"
+            exit 1
+          else
+            echo "Check task correctly failed version test"
+          fi
 
   test-install-task-on-other-os-via-containers:
     strategy:

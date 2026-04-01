@@ -1,3 +1,6 @@
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'apt_source', Justification='Used by Bolt task wrapper for Linux installs')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'yum_source', Justification='Used by Bolt task wrapper for Linux installs')]
+
 [CmdletBinding()]
 param(
   [Parameter(Mandatory = $false)]
@@ -34,7 +37,7 @@ function Write-Result($status, $message, $extra = @{}) {
 
 # Exit if anything other than the agent is requested
 if ($package -ne $agent_package) {
-  Write-Result "failure" "Unsupported package name '$package'. This task only supports '$agent_package'."
+  Write-Result -status "failure" -message "Unsupported package name '$package'. This task only supports '$agent_package'."
 }
 
 try {
@@ -46,7 +49,7 @@ try {
   if ($installed) {
     $installedVersion = $installed.DisplayVersion
     if ($installedVersion -eq $version) {
-      Write-Result "skipped" "$agent_package $version is already installed." @{ version = $installedVersion }
+      Write-Result -status "skipped" -message "$agent_package $version is already installed." @{ version = $installedVersion }
     }
   }
 
@@ -60,7 +63,7 @@ try {
         Write-Verbose "Stopping $serviceName service as requested."
         Stop-Service -Name $serviceName -Force -ErrorAction Stop
       } else {
-        Write-Result "failure" "The $serviceName service is running. Use stop_service=true to allow upgrade."
+        Write-Result -status "failure" -message "The $serviceName service is running. Use stop_service=true to allow upgrade."
       }
     }
   }
@@ -95,12 +98,12 @@ try {
   }
 
   # Return success result
-  Write-Result "success" "$agent_package $version installed successfully." @{
+  Write-Result -status "success" -message "$agent_package $version installed successfully." @{
     package = $agent_package
     version = $newInstall.DisplayVersion
     source  = $url
   }
 
 } catch {
-  Write-Result "failure" $_.Exception.Message
+  Write-Result -status "failure" -message $_.Exception.Message
 }

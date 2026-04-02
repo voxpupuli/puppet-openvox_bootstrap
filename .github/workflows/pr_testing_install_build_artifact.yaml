@@ -18,7 +18,7 @@ jobs:
           - 24.04
     runs-on: ${{ format('ubuntu-{0}', matrix.os-version) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - id: install-bolt
         uses: ./.github/actions/bolt
         with:
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ${{ matrix.image }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           path: openvox_bootstrap
       - id: prep
@@ -88,7 +88,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ${{ matrix.details.image }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           path: openvox_bootstrap
       - id: prep
@@ -133,7 +133,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ${{ matrix.image }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           path: openvox_bootstrap
       - id: prep

@@ -102,7 +102,7 @@ try {
   # Return success result
   Write-Result -status "success" -message "$agent_package $version installed successfully." @{
     package = $agent_package
-    version = $newInstall.DisplayVersion
+    version = $version
     source  = $url
   }
 

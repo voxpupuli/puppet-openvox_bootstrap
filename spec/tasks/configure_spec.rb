@@ -57,7 +57,7 @@ describe 'openvox_bootstrap::configure' do
     end
     let(:puppet_conf_path) { File.join(tmpdir, 'puppet.conf') }
 
-    it 'call puppet config set' do
+    it 'calls puppet config set' do
       expect(task.update_puppet_conf(puppet_conf, tmpdir)).to(
         eq(
           {
@@ -225,7 +225,7 @@ describe 'openvox_bootstrap::configure' do
       )
     end
 
-    it 'returns a result has if all steps are successful' do
+    it 'returns a result if all steps are successful' do
       expect(task).to receive(:update_puppet_conf).and_return({ puppet_conf: { successful: true } })
       expect(task).to receive(:write_csr_attributes).and_return({ csr_attributes: { successful: true } })
       expect(task).to receive(:manage_puppet_service).and_return({ puppet_service: { successful: true } })

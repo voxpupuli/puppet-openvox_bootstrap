@@ -95,7 +95,7 @@ module OpenvoxBootstrap
 
       csr_attributes_path = File.join(etc_puppet_path, 'csr_attributes.yaml')
       csr_attributes_contents = csr_attributes.to_yaml
-      File.open(csr_attributes_path, 'w', perm: 0o640) do |f|
+      File.open(csr_attributes_path, 'w', 0o640) do |f|
         f.write(csr_attributes_contents)
       end
       # nil uid/gid are ignored by FileUtils.chown...

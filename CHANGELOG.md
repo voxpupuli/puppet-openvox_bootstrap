@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
+## [v1.4.0](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v1.4.0) (2026-04-13)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/v1.3.0...v1.4.0)
+
+**Implemented enhancements:**
+
+- Add GitHub action for windows testing [\#54](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/54) ([jpartlow](https://github.com/jpartlow))
+- Allow downgrades using apt when version specified  [\#51](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/51) ([jpartlow](https://github.com/jpartlow))
+- Install packages with dnf/apt, not rpm/dpkg [\#50](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/50) ([bastelfreak](https://github.com/bastelfreak))
+
+**Fixed bugs:**
+
+- Windows updates [\#55](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/55) ([jpartlow](https://github.com/jpartlow))
+
 ## [v1.3.0](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v1.3.0) (2026-01-01)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/v1.2.0...v1.3.0)

@@ -1,6 +1,6 @@
 # openvox_bootstrap
 
-[Bolt] module for bootstrapping installation of the [openvox]
+[OpenBolt] module for bootstrapping installation of the [OpenVox]
 (Puppet<sup>:tm:</sup>) packages.
 
 Provides some of the functionality of the [puppet_agent::install
@@ -10,11 +10,23 @@ https://yum.voxpupuli.org.
 The puppet_agent module makes use of the Perforce repositories and
 collections instead.
 
+## Platforms
+
+The tasks currently handle rpm/deb management of the openvox packages
+on the following nix platforms, and provides the msi for windows:
+
+* Debian/Ubuntu
+* EL 8,9,10
+* Fedora
+* Windows
+
+See the .github/workflows/pr_*.yml files for test matrices.
+
 ## Usage
 
-Assumes you have Bolt installed.
+Assumes you have OpenBolt installed.
 
-### openvox_boostrap::install
+### openvox_bootstrap::install
 
 Installs the platform appropriate openvox8 collection release package
 and the openvox-agent package by default (Puppet<sup>:tm:</sup> 8).
@@ -33,7 +45,17 @@ collection.
 
 See the [install task](./REFERENCE.md#install) for details.
 
-#### Usage with Bolt apply_prep() function
+#### Automatic Usage with OpenBolt apply_prep() function
+
+With the release of OpenVox community's [OpenBolt] 5 implementation of
+Bolt, the openvox_bootstrap module is now used internally by OpenBolt in
+place of the puppet_agent module to ensure that the openvox-agent is
+automatically installed on nodes when the [apply_prep] function is used.
+
+This is constrained by the platform limitations of the module listed
+above.
+
+#### Manual Usage with older Bolt packages
 
 Bolt's [apply_prep] function ensures that the latest version of
 Puppet<sup>:tm:</sup> is installed on a node by calling the
@@ -54,6 +76,8 @@ plugin-hooks:
     plugin: task
     task: openvox_bootstrap::install
 ```
+
+(Or install OpenBolt 5, which has this configuration built in.)
 
 ### openvox_bootstrap::install_build_artifact
 
@@ -93,9 +117,9 @@ It provides the following support:
   extension data to the generated certificate.
 * ensuring the `puppet` service is in a preferred state.
 
-NOTE: the csr_attributes.yaml will overwrite any pre-existing files,
+**NOTE: the csr_attributes.yaml will overwrite any pre-existing files,
 but settings for puppet.conf will be merged into an existing file if
-present.
+present.**
 
 With an example params.json file like this:
 
@@ -134,8 +158,7 @@ See [REFERENCE.md](./REFERENCE.md) for the generated reference doc.
 
 ## TODO
 
-* Windows support
-* Sles support (handle repository gpg key)
+* SLES support (handle repository gpg key)
 * MacOS support
 
 ## History
@@ -166,6 +189,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+[openbolt]: https://github.com/OpenVoxProject/openbolt/
 [bolt]: https://puppet.com/docs/bolt/latest/bolt.html
 [openvox]: https://voxpupuli.org/openvox/
 [puppet_agent::install tasks]: https://github.com/puppetlabs/puppetlabs-puppet_agent/tree/main?tab=readme-ov-file#puppet_agentinstall

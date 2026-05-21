@@ -24,10 +24,10 @@ jobs:
           - [rocky, '8']
           - [rocky, '9']
           - [rocky, '10']
-          - [ubuntu, '18.04']
           - [ubuntu, '20.04']
           - [ubuntu, '22.04']
           - [ubuntu, '24.04']
+          - [ubuntu, '26.04']
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6

@@ -14,6 +14,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        arch:
+          - x86_64
+          - aarch64
         os:
           - [almalinux, '8']
           - [almalinux, '9']
@@ -24,10 +27,16 @@ jobs:
           - [rocky, '8']
           - [rocky, '9']
           - [rocky, '10']
-          - [ubuntu, '20.04']
           - [ubuntu, '22.04']
           - [ubuntu, '24.04']
           - [ubuntu, '26.04']
+        exclude:
+          - arch: aarch64
+            os: [ubuntu, '22.04']
+          - arch: aarch64
+            os: [ubuntu, '24.04']
+          - arch: aarch64
+            os: [ubuntu, '26.04']
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
@@ -40,24 +49,17 @@ jobs:
         with:
           os: ${{ matrix.os[0] }}
           os-version: ${{ matrix.os[1] }}
-          os-arch: ${{ matrix.os[2] || 'x86_64' }}
-          image_version: ${{ matrix.os[3] }}
+          os-arch: ${{ matrix.arch }}
+          image_version: ${{ matrix.os[2] }}
           host-root-access: true
-          ruby-version: '3.3'
           install-openvox: false
-          # Note: the cpu_mode is set to host-model for the sake of
-          # el-9 which expects at least x86_64-2 arch. This depends on
-          # the runner's architecture being sufficient, and there is
-          # probably a better way to get this set on the libvirt
-          # domain instead.
           vms: |-
             [
               {
                 "role": "agent",
                 "count": 1,
                 "cpus": 2,
-                "mem_mb": 4096,
-                "cpu_mode": "host-model"
+                "mem_mb": 4096
               }
             ]
       - name: Capture dereferenced inventory for use with openvox_bootstrap
@@ -79,10 +81,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        arch:
+          - x86_64
+          - aarch64
         os:
           - [debian, '13']
           - [rocky, '10']
           - [ubuntu, '24.04']
+        exclude:
+          - arch: aarch64
+            os: [ubuntu, '24.04']
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
@@ -95,24 +103,17 @@ jobs:
         with:
           os: ${{ matrix.os[0] }}
           os-version: ${{ matrix.os[1] }}
-          os-arch: ${{ matrix.os[2] || 'x86_64' }}
-          image_version: ${{ matrix.os[3] }}
+          os-arch: ${{ matrix.arch }}
+          image_version: ${{ matrix.os[2] }}
           host-root-access: true
-          ruby-version: '3.3'
           install-openvox: false
-          # Note: the cpu_mode is set to host-model for the sake of
-          # el-9 which expects at least x86_64-2 arch. This depends on
-          # the runner's architecture being sufficient, and there is
-          # probably a better way to get this set on the libvirt
-          # domain instead.
           vms: |-
             [
               {
                 "role": "agent",
                 "count": 1,
                 "cpus": 2,
-                "mem_mb": 4096,
-                "cpu_mode": "host-model"
+                "mem_mb": 4096
               }
             ]
       - name: Capture dereferenced inventory for use with openvox_bootstrap

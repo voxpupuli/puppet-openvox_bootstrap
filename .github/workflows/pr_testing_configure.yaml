@@ -48,21 +48,18 @@ jobs:
           os-version: ${{ matrix.os[1] }}
           os-arch: ${{ matrix.os[2] || 'x86_64' }}
           host-root-access: true
-          ruby-version: '3.3'
           install-openvox: false
           vms: |-
             [
               {
                 "role": "primary",
                 "cpus": 4,
-                "mem_mb": 8192,
-                "cpu_mode": "host-model"
+                "mem_mb": 8192
               },
               {
                 "role": "agent",
                 "cpus": 2,
-                "mem_mb": 4096,
-                "cpu_mode": "host-model"
+                "mem_mb": 4096
               }
             ]
       - name: Capture dereferenced inventory for use with openvox_bootstrap

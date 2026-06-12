@@ -28,10 +28,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        runner-suffix:
+          - ''
+          - '-arm'
         os-version:
           - 22.04
           - 24.04
-    runs-on: ${{ format('ubuntu-{0}', matrix.os-version) }}
+    runs-on: ${{ format('ubuntu-{0}{1}', matrix.os-version, matrix.runner-suffix) }}
     needs: shellcheck
     steps:
       - uses: actions/checkout@v6
@@ -57,6 +60,9 @@ jobs:
   test-install-task-on-other-os-via-containers:
     strategy:
       matrix:
+        runner:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
         image:
           - almalinux:8
           - almalinux:9
@@ -71,7 +77,7 @@ jobs:
           # Need to pull in the repo GPG keys for sles
           #          - registry.suse.com/suse/sle15:15.6
     needs: shellcheck
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     container: ${{ matrix.image }}
     steps:
       - uses: actions/checkout@v6

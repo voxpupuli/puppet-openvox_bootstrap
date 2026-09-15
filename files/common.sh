@@ -115,7 +115,7 @@ set_os_family() {
     amazon)
       os_family='amazon'
       ;;
-    rhel|redhat|centos|scientific|oraclelinux|rocky|almalinux)
+    rhel|redhat|centos|scientific|oraclelinux|rocky|almalinux|springdale)
       os_family='el'
       ;;
     fedora)

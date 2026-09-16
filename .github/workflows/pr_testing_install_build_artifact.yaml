@@ -41,7 +41,6 @@ jobs:
           - rockylinux:8
           - rockylinux:9
           - rockylinux/rockylinux:10
-          - debian:11
           - debian:12
           - debian:13
           - fedora:43
@@ -124,7 +123,6 @@ jobs:
           - rockylinux:8
           - rockylinux:9
           - rockylinux/rockylinux:10
-          - debian:11
           - debian:12
           - debian:13
           - fedora:43

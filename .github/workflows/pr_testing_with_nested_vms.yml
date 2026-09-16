@@ -21,7 +21,6 @@ jobs:
           - [almalinux, '8']
           - [almalinux, '9']
           - [almalinux, '10']
-          - [debian, '11']
           - [debian, '12']
           - [debian, '13']
           - [rocky, '8']

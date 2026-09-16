@@ -271,38 +271,48 @@ describe 'openvox_bootstrap::configure' do
     end
 
     it 'prints results and exits 1 if any step fails' do
-      expect(task).to receive(:manage_puppet_service).and_return({ puppet_service: { successful: true } })
+      expect(task).to(
+        receive(:manage_puppet_service)
+          .and_return(
+            {
+              puppet_service: {
+                successful: true,
+              },
+            },
+          ),
+      )
       expect(task).to(
         receive(:update_puppet_conf)
-        .and_return(
-          {
-            puppet_conf: {
-              successful: false,
-              errors: { '--section=main server=puppet.spec' => 'error output' },
+          .and_return(
+            {
+              puppet_conf: {
+                successful: false,
+                errors: { '--section=main server=puppet.spec' => 'error output' },
+              },
             },
-          },
-        ),
+          ),
       )
 
+      output_regex = Regexp.new(<<~'REGEX', Regexp::MULTILINE)
+        \{
+          "puppet_conf": \{
+            "successful": false,
+            "errors": \{
+              "--section=main server=puppet\.spec": "error output"
+            }
+          },
+          "puppet_service": \{
+            "successful": true
+          }
+        }
+
+        Failed managing puppet_conf:
+
+        \{"--section=main server=puppet\.spec"\s*=>\s*"error output"}
+      REGEX
       expect { task.task }.to(
         raise_error(SystemExit).and(
-          output(<<~EOM).to_stdout,
-            {
-              "puppet_conf": {
-                "successful": false,
-                "errors": {
-                  "--section=main server=puppet.spec": "error output"
-                }
-              },
-              "puppet_service": {
-                "successful": true
-              }
-            }
-
-            Failed managing puppet_conf:
-
-            {"--section=main server=puppet.spec"=>"error output"}
-          EOM
+          output(output_regex).to_stdout,
         ).and(output('').to_stderr),
       )
     end

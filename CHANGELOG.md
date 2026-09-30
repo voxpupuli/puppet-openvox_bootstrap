@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
+## [v1.5.0](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v1.5.0) (2026-09-30)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/v1.4.0...v1.5.0)
+
+**Implemented enhancements:**
+
+- Install the redhatfips packages on hosts in FIPS mode [\#63](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/63) ([nmburgan](https://github.com/nmburgan))
+- Trivially add support for Springdale Linux RHEL-a-like [\#60](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/60) ([davids-uta-edu](https://github.com/davids-uta-edu))
+
+**Closed issues:**
+
+- Add a class that installs and upgrades openvox-agent from a Puppet run [\#62](https://github.com/voxpupuli/puppet-openvox_bootstrap/issues/62)
+
+**Merged pull requests:**
+
+- Drop eol debian 11 from gha test matrices [\#61](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/61) ([jpartlow](https://github.com/jpartlow))
+- \(ci\) Add arm64 vms to the test matrices [\#59](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/59) ([jpartlow](https://github.com/jpartlow))
+- Add Ubuntu 26.04 to gha nested\_vms workflow [\#58](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/58) ([jpartlow](https://github.com/jpartlow))
+
 ## [v1.4.0](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v1.4.0) (2026-04-13)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/v1.3.0...v1.4.0)

@@ -106,7 +106,13 @@ translate_codename_to_version() {
   esac
 }
 
-# Set the $os_family variable based on the platform.
+# Test whether the kernel runs in FIPS mode.
+fips_mode() {
+  [[ "$(cat /proc/sys/crypto/fips_enabled 2>/dev/null)" == '1' ]]
+}
+
+# Set the $os_family variable based on the platform, and for EL also on
+# whether the host runs in FIPS mode.
 set_os_family() {
   local _platform="${1:-${platform}}"
 
@@ -116,7 +122,15 @@ set_os_family() {
       os_family='amazon'
       ;;
     rhel|redhat|centos|scientific|oraclelinux|rocky|almalinux|springdale)
-      os_family='el'
+      # OpenVox publishes separate packages for EL hosts that run in FIPS
+      # mode, named redhatfips instead of el. Which EL versions and
+      # architectures have them is up to the package servers, a host
+      # without them fails when it fetches them.
+      if fips_mode; then
+        os_family='redhatfips'
+      else
+        os_family='el'
+      fi
       ;;
     fedora)
       os_family='fedora'
@@ -181,7 +195,7 @@ set_package_type() {
   fi
 
   case $_os_family in
-    amazon|fedora|el|sles)
+    amazon|fedora|el|redhatfips|sles)
       package_type='rpm'
       package_file_suffix='noarch.rpm'
       ;;

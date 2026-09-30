@@ -220,6 +220,27 @@ describe 'files/common.sh' do
           expect(output).to include('Assigned os_family=debian')
         end
       end
+
+      context 'on an EL host' do
+        let(:os) { :rocky9 }
+
+        it 'selects the redhatfips packages in FIPS mode' do
+          allow_script.to receive_command(:fips_mode).and_exec('return 0')
+          output, status = test('set_platform_globals')
+
+          expect(status.success?).to be(true)
+          expect(output).to include('Assigned platform=Rocky')
+          expect(output).to include('Assigned os_family=redhatfips')
+        end
+
+        it 'keeps the el packages outside FIPS mode' do
+          allow_script.to receive_command(:fips_mode).and_exec('return 1')
+          output, status = test('set_platform_globals')
+
+          expect(status.success?).to be(true)
+          expect(output).to include('Assigned os_family=el')
+        end
+      end
     end
 
     context 'fails' do
@@ -238,6 +259,79 @@ describe 'files/common.sh' do
         expect(status.success?).to be(false)
         expect(output).to include("Unhandled platform: 'Unknown'")
       end
+    end
+  end
+
+  context 'fips_mode' do
+    it 'returns 0 when the kernel flag reads 1' do
+      allow_script.to receive_command(:cat).and_exec(<<~EOF)
+        [ "$1" = '/proc/sys/crypto/fips_enabled' ] && echo 1
+      EOF
+      output, status = test('fips_mode')
+
+      expect(status.success?).to be(true)
+      expect(output).to be_empty
+    end
+
+    it 'returns non-zero when the kernel flag reads 0' do
+      allow_script.to receive_command(:cat).and_exec('echo 0')
+      output, status = test('fips_mode')
+
+      expect(status.success?).to be(false)
+      expect(output).to be_empty
+    end
+
+    it 'returns non-zero when the kernel has no flag' do
+      allow_script.to receive_command(:cat).and_exec(<<~EOF)
+        echo 'cat: /proc/sys/crypto/fips_enabled: No such file or directory' >&2
+        return 1
+      EOF
+      output, status = test('fips_mode')
+
+      expect(status.success?).to be(false)
+      expect(output).to be_empty
+    end
+  end
+
+  context 'set_os_family' do
+    context 'in FIPS mode' do
+      before do
+        allow_script.to receive_command(:fips_mode).and_exec('return 0')
+      end
+
+      it 'switches EL to redhatfips' do
+        output, status = test('set_os_family AlmaLinux')
+
+        expect(status.success?).to be(true)
+        expect(output).to include('Assigned os_family=redhatfips')
+      end
+
+      %w[amazon fedora sles debian ubuntu].each do |family|
+        it "leaves #{family} alone" do
+          output, status = test("set_os_family #{family}")
+
+          expect(status.success?).to be(true)
+          expect(output).to include("Assigned os_family=#{family}")
+        end
+      end
+    end
+
+    it 'keeps el outside FIPS mode' do
+      allow_script.to receive_command(:fips_mode).and_exec('return 1')
+      output, status = test('set_os_family AlmaLinux')
+
+      expect(status.success?).to be(true)
+      expect(output).to include('Assigned os_family=el')
+    end
+  end
+
+  context 'set_package_type' do
+    it 'sets rpm for redhatfips' do
+      output, status = test('set_package_type redhatfips')
+
+      expect(status.success?).to be(true)
+      expect(output).to include('Assigned package_type=rpm')
+      expect(output).to include('Assigned package_file_suffix=noarch.rpm')
     end
   end
 
@@ -482,6 +576,18 @@ describe 'files/common.sh' do
         package_name = 'openvoxdb-termini-8.9.1-1.el.noarch.rpm'
         expect(output).to include("Assigned package_name=#{package_name}")
         expect(output).to include("Assigned package_url=https://foo/openvoxdb/8.9.1/#{package_name}")
+      end
+
+      it 'builds a redhatfips url' do
+        allow_script.to set_env('os_family', 'redhatfips')
+        allow_script.to set_env('os_major_version', '9')
+        allow_script.to receive_command(:uname).and_exec('echo x86_64')
+        output, status = test('set_artifacts_package_url https://foo openvox-agent 8.29.0')
+
+        expect(status.success?).to be(true)
+        package_name = 'openvox-agent-8.29.0-1.redhatfips9.x86_64.rpm'
+        expect(output).to include("Assigned package_name=#{package_name}")
+        expect(output).to include("Assigned package_url=https://foo/openvox-agent/8.29.0/#{package_name}")
       end
 
       it 'builds a fedora url' do

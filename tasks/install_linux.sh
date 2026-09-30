@@ -51,7 +51,7 @@ set_repository() {
   local _family="$1"
 
   case $_family in
-    amazon|fedora|el|sles)
+    amazon|fedora|el|redhatfips|sles)
       repository=$yum_source
       ;;
     debian|ubuntu)

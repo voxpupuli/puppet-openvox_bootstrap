@@ -20,6 +20,14 @@ on the following nix platforms, and provides the msi for windows:
 * Fedora
 * Windows
 
+On EL hosts that run in FIPS mode, the install tasks pick the
+redhatfips packages that OpenVox builds for FIPS. OpenVox publishes
+them for a subset of the EL versions and architectures. On an EL host
+in FIPS mode outside that subset the tasks fail when they fetch the
+packages, rather than install packages that were not built for FIPS.
+Other platforms get their usual packages whether or not the host runs
+in FIPS mode.
+
 See the .github/workflows/pr_*.yml files for test matrices.
 
 ## Usage

@@ -237,3 +237,43 @@ jobs:
         env:
           PT_version: "8.18.0"
         run: ./openvox_bootstrap/tasks/check_linux.sh
+
+  test-redundant-release-package-install:
+    strategy:
+      matrix:
+        image:
+          - rockylinux:9
+          - debian:13
+    needs: shellcheck
+    runs-on: ubuntu-latest
+    container: ${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: openvox_bootstrap
+      - id: prep
+        uses: ./openvox_bootstrap/.github/actions/container_task_prep
+      - name: Install latest agent
+        env:
+          PT_collection: openvox8
+        run: ./openvox_bootstrap/tasks/install_linux.sh
+      - name: Repeat and check that openvox release package is reinstalled
+        shell: bash
+        env:
+          PT_collection: openvox8
+          PT_package: openvox-server
+        run: |-
+          output=$(./openvox_bootstrap/tasks/install_linux.sh)
+          echo "${output}"
+          grep 'Installing package.*openvox8-release' <<<"${output}"
+      - name: But not reinstalled if force_release_package is false
+        shell: bash
+        env:
+          PT_collection: openvox8
+          PT_package: openvox-server
+          PT_force_release_package: 'false'
+        run: |-
+          output=$(./openvox_bootstrap/tasks/install_linux.sh)
+          echo "${output}"
+          grep -v 'Installing package.*openvox8-release' <<<"${output}"
+          grep 'Release package already installed' <<<"${output}"

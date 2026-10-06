@@ -157,6 +157,12 @@ Data type: `Optional[Boolean]`
 
 Whether to stop the given service after install. (Requires puppet on the system.)
 
+##### `force_release_package`
+
+Data type: `Optional[Boolean]`
+
+Force download and install of the Openvox release package for the collection. If set to false, the script will test first whether the release package is installed.
+
 ### <a name="install_build_artifact"></a>`install_build_artifact`
 
 Downloads and installs a package directly from the openvox build artifact server.
@@ -182,4 +188,3 @@ The version of the package to install.
 Data type: `String[1]`
 
 URL to the build artifacts server.
-

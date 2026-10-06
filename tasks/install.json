@@ -30,6 +30,11 @@
       "description": "Whether to stop the given service after install. (Requires puppet on the system.)",
       "type": "Optional[Boolean]",
       "default": false
+    },
+    "force_release_package": {
+      "description": "Force download and install of the Openvox release package for the collection. If set to false, the script will test first whether the release package is installed.",
+      "type": "Optional[Boolean]",
+      "default": true
     }
   },
   "implementations": [

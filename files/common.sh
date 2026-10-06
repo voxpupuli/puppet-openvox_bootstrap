@@ -273,7 +273,7 @@ install_package_file() {
   # If not set, use the file extension of the package file.
   local _package_type="${2:-${_package_file##*.}}"
 
-  info "Installing release package '${_package_file}' of type '${_package_type}'"
+  info "Installing package '${_package_file}' of type '${_package_type}'"
   case $_package_type in
     rpm)
       # can switch to dnf when we drop amazon 2 support

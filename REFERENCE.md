@@ -131,7 +131,7 @@ The name of the package to install.
 
 Data type: `Optional[String]`
 
-The version of the openvox-agent package to install.
+The version of the openvox package to install.
 
 ##### `collection`
 

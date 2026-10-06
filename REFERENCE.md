@@ -182,4 +182,3 @@ The version of the package to install.
 Data type: `String[1]`
 
 URL to the build artifacts server.
-

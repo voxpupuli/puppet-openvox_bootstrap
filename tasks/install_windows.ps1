@@ -72,7 +72,11 @@ try {
   # XXX: Move this metadata out to the openvox-agent build pipeline by way of a
   # latest package symlink or similar artifact.
   if ($version -eq "latest") {
-    $version = '8.25.0'
+    if ($collection -eq 'openvox9') {
+      $version = '9.0.0'
+    } else {
+      $version = '8.29.0'
+    }
   }
 
   # Build download URL

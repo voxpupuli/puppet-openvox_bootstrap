@@ -6,7 +6,7 @@ set -e
 declare PT__installdir
 package=${PT_package:-openvox-agent}
 version=${PT_version:-latest}
-collection=${PT_collection:-openvox8}
+collection=${PT_collection:-openvox9}
 yum_source=${PT_yum_source:-https://yum.voxpupuli.org}
 apt_source=${PT_apt_source:-https://apt.voxpupuli.org}
 stop_service=${PT_stop_service:-'false'}

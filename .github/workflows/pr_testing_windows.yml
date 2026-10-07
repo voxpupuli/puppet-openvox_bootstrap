@@ -36,18 +36,18 @@ jobs:
           path: openvox_bootstrap
       - name: Run install task manually for openvox-agent
         shell: powershell
-        run: ./openvox_bootstrap/tasks/install_windows.ps1 -collection openvox8
+        run: ./openvox_bootstrap/tasks/install_windows.ps1 -collection openvox9
       - name: Verify openvox-agent is installed
         shell: powershell
-        run: ./openvox_bootstrap/tasks/check_windows.ps1 -version "8" -test 'gt'
+        run: ./openvox_bootstrap/tasks/check_windows.ps1 -version "9" -test 'gt'
       - name: Verify idempotency
         shell: powershell
-        run: ./openvox_bootstrap/tasks/install_windows.ps1 -collection openvox8
+        run: ./openvox_bootstrap/tasks/install_windows.ps1 -collection openvox9
       - name: Verify that check task can provide a negative result
         shell: powershell
         run: |-
           $ErrorActionPreference = 'continue'
-          ./openvox_bootstrap/tasks/check_windows.ps1 -version "8" -test 'lt'
+          ./openvox_bootstrap/tasks/check_windows.ps1 -version "9" -test 'lt'
           if ($LASTEXITCODE -eq 0) {
             throw "Check task should have failed version test but did not."
           } else {
@@ -79,10 +79,10 @@ jobs:
       - uses: actions/checkout@v6
         with:
           path: openvox_bootstrap
-      - name: Install latest agent
+      - name: Install latest agent in collection
         shell: powershell
         run: ./openvox_bootstrap/tasks/install_windows.ps1 -collection openvox8
-      - name: Verify later openvox-agent is installed
+      - name: Verify openvox-agent is installed
         shell: powershell
         run: ./openvox_bootstrap/tasks/check_windows.ps1
       - name: Install older version of agent

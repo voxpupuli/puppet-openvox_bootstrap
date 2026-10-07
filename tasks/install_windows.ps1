@@ -10,7 +10,7 @@ param(
   [string]$version = "latest",
 
   [Parameter(Mandatory = $false)]
-  [string]$collection = "openvox8",
+  [string]$collection = "openvox9",
 
   [Parameter(Mandatory = $false)]
   [string]$apt_source = "https://apt.voxpupuli.org",

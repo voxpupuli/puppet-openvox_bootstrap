@@ -273,7 +273,7 @@ install_package_file() {
   # If not set, use the file extension of the package file.
   local _package_type="${2:-${_package_file##*.}}"
 
-  info "Installing release package '${_package_file}' of type '${_package_type}'"
+  info "Installing package '${_package_file}' of type '${_package_type}'"
   case $_package_type in
     rpm)
       # can switch to dnf when we drop amazon 2 support
@@ -546,4 +546,30 @@ stop_and_disable_service() {
   else
     fail "Puppet executable not found at '${_puppet}'. Cannot stop and disable service '${_service}'."
   fi
+}
+
+# Test whether the Openvox release package is already installed for
+# the given collection.
+is_release_package_installed() {
+  local _collection="${1}"
+  local _package_type="${2}"
+
+  local release_package="${_collection}-release"
+  info "Testing whether ${release_package} is already installed"
+  case "${_package_type}" in
+    deb)
+      exec_and_capture dpkg-query --show "--showformat=\${Status}" "${release_package}"
+      if grep -q 'ok installed' <<<"${LAST_EXEC_AND_CAPTURE_OUTPUT}"; then
+        return 0
+      else
+        return 1
+      fi
+      ;;
+    rpm)
+      exec_and_capture rpm -q "${release_package}"
+      ;;
+    *)
+      fail "Unhandled package type: '${_package_type}'"
+      ;;
+  esac
 }

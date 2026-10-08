@@ -664,4 +664,84 @@ describe 'files/common.sh' do
       end
     end
   end
+
+  context 'is_release_package_installed' do
+    before do
+      allow_script.to receive_command(:date).and_exec('echo ts')
+    end
+
+    it 'fails for unknown package type' do
+      output, status = test('is_release_package_installed openvox8 unknown-package-type')
+
+      expect(status.success?).to be(false)
+      expect(output).to include("Unhandled package type: 'unknown-package-type'")
+    end
+
+    context 'deb' do
+      it 'is successful if release deb installed' do
+        allow_script.to receive_command(:'dpkg-query').and_exec(<<~EOF)
+          echo -n 'install ok installed'
+        EOF
+
+        output, status = test('is_release_package_installed openvox8 deb')
+        expect(status.success?).to be(true)
+        expect(output).to eq(<<~OUT)
+          ts [INFO]: Testing whether openvox8-release is already installed
+          ts [INFO]: Executing: dpkg-query --show --showformat=${Status} openvox8-release
+          install ok installed
+          ts [INFO]: Status: 0
+        OUT
+      end
+
+      it 'fails if release deb is not installed installed' do
+        allow_script.to receive_command(:'dpkg-query').and_exec(<<~EOF)
+          echo 'dpkg-query: no packages found matching openvox8-release' >&2
+          return 1
+        EOF
+
+        output, status = test('is_release_package_installed openvox8 deb')
+        expect(status.success?).to be(false)
+        expect(output).to eq(<<~OUT)
+          ts [INFO]: Testing whether openvox8-release is already installed
+          ts [INFO]: Executing: dpkg-query --show --showformat=${Status} openvox8-release
+          dpkg-query: no packages found matching openvox8-release
+          ts [INFO]: Status: 1
+        OUT
+      end
+    end
+
+    context 'rpm' do
+      it 'is successful if release rpm installed' do
+        allow_script.to receive_command(:rpm).and_exec(<<~EOF)
+          echo 'openvox8-release-1-1.el8.noarch'
+          return 0
+        EOF
+
+        output, status = test('is_release_package_installed openvox8 rpm')
+        expect(status.success?).to be(true)
+        expect(output).to eq(<<~OUT)
+          ts [INFO]: Testing whether openvox8-release is already installed
+          ts [INFO]: Executing: rpm -q openvox8-release
+          openvox8-release-1-1.el8.noarch
+          ts [INFO]: Status: 0
+        OUT
+      end
+
+      it 'fails if release rpm is not installed installed' do
+        allow_script.to receive_command(:rpm).and_exec(<<~EOF)
+          echo 'package openvox8-release is not installed'
+          return 1
+        EOF
+
+        output, status = test('is_release_package_installed openvox8 rpm')
+        expect(status.success?).to be(false)
+        expect(output).to eq(<<~OUT)
+          ts [INFO]: Testing whether openvox8-release is already installed
+          ts [INFO]: Executing: rpm -q openvox8-release
+          package openvox8-release is not installed
+          ts [INFO]: Status: 1
+        OUT
+      end
+    end
+  end
 end

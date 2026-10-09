@@ -137,7 +137,7 @@ The version of the openvox package to install.
 
 Data type: `Optional[String]`
 
-The openvox collection to install from.
+The openvox collection to install from. If not set, this will be based on version major, or fallback to the latest default in the script itself.
 
 ##### `apt_source`
 

@@ -12,9 +12,8 @@
       "default": "latest"
     },
     "collection": {
-      "description": "The openvox collection to install from.",
-      "type": "Optional[String]",
-      "default": "openvox9"
+      "description": "The openvox collection to install from. If not set, this will be based on version major, or fallback to the latest default in the script itself.",
+      "type": "Optional[String]"
     },
     "apt_source": {
       "description": "The apt source repository to retrieve deb packages from.",

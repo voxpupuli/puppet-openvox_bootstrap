@@ -10,7 +10,7 @@ param(
   [string]$version = "latest",
 
   [Parameter(Mandatory = $false)]
-  [string]$collection = "openvox9",
+  [string]$collection = $null,
 
   [Parameter(Mandatory = $false)]
   [string]$apt_source = "https://apt.voxpupuli.org",
@@ -65,6 +65,15 @@ try {
       } else {
         Write-Result -status "failure" -message "The $serviceName service is running. Use stop_service=true to allow upgrade."
       }
+    }
+  }
+
+  # Resolve collection
+  if (-not $collection) {
+    if ($version -match '^(\d+)(\.|$)') {
+      $collection = "openvox$($matches[1])"
+    } else {
+      $collection = $default_collection
     }
   }
 

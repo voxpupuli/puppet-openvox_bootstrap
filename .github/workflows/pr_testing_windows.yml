@@ -36,13 +36,13 @@ jobs:
           path: openvox_bootstrap
       - name: Run install task manually for openvox-agent
         shell: powershell
-        run: ./openvox_bootstrap/tasks/install_windows.ps1 -collection openvox9
+        run: ./openvox_bootstrap/tasks/install_windows.ps1
       - name: Verify openvox-agent is installed
         shell: powershell
         run: ./openvox_bootstrap/tasks/check_windows.ps1 -version "9" -test 'gt'
       - name: Verify idempotency
         shell: powershell
-        run: ./openvox_bootstrap/tasks/install_windows.ps1 -collection openvox9
+        run: ./openvox_bootstrap/tasks/install_windows.ps1
       - name: Verify that check task can provide a negative result
         shell: powershell
         run: |-

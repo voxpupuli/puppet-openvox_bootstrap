@@ -744,4 +744,55 @@ describe 'files/common.sh' do
       end
     end
   end
+
+  context 'set_collection' do
+    it 'sets to given' do
+      output, status = test('set_collection given openvox-agent latest default')
+
+      expect(status.success?).to be(true)
+      expect(output).to include('Assigned collection=given')
+    end
+
+    it 'sets to given irrespective of version' do
+      output, status = test("set_collection given openvox-agent '8.0' default")
+
+      expect(status.success?).to be(true)
+      expect(output).to include('Assigned collection=given')
+    end
+
+    it 'sets to version major if not given' do
+      output, status = test("set_collection '' openvox-agent '8.0' default")
+
+      expect(status.success?).to be(true)
+      expect(output).to include('Assigned collection=openvox8')
+
+      output, status = test("set_collection '' openvox-agent '9.0' default")
+
+      expect(status.success?).to be(true)
+      expect(output).to include('Assigned collection=openvox9')
+    end
+
+    # This would likely fail an actual install, since there would not
+    # be an actual openvox-agent '9' package.
+    it 'handles truncated version string' do
+      output, status = test("set_collection '' openvox-agent '9' default")
+
+      expect(status.success?).to be(true)
+      expect(output).to include('Assigned collection=openvox9')
+    end
+
+    it 'sets to default if not given and version not numeric' do
+      output, status = test("set_collection '' openvox-agent latest default")
+
+      expect(status.success?).to be(true)
+      expect(output).to include('Assigned collection=default')
+    end
+
+    it 'handles the openbolt 5 case' do
+      output, status = test("set_collection '' openbolt 5.0 default")
+
+      expect(status.success?).to be(true)
+      expect(output).to include('Assigned collection=openvox8')
+    end
+  end
 end

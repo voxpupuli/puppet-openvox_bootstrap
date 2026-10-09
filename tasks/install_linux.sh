@@ -6,11 +6,13 @@ set -e
 declare PT__installdir
 package=${PT_package:-openvox-agent}
 version=${PT_version:-latest}
-collection=${PT_collection:-openvox9}
+given_collection=${PT_collection:-''}
 yum_source=${PT_yum_source:-https://yum.voxpupuli.org}
 apt_source=${PT_apt_source:-https://apt.voxpupuli.org}
 stop_service=${PT_stop_service:-'false'}
 force_release_package=${PT_force_release_package:-'true'}
+
+DEFAULT_COLLECTION='openvox9'
 
 # shellcheck source=files/common.sh
 source "${PT__installdir}/openvox_bootstrap/files/common.sh"
@@ -67,15 +69,16 @@ set_repository() {
 #   release_package_url - the url to download the release package
 set_collection_url() {
   local _platform="$1"
+  local _collection="$2"
 
   set_repository "${os_family}"
 
   case "${package_type}" in
     rpm)
-      release_package_name="${collection}-release-${os_family}-${os_major_version}.${package_file_suffix}"
+      release_package_name="${_collection}-release-${os_family}-${os_major_version}.${package_file_suffix}"
       ;;
     deb)
-      release_package_name="${collection}-release-${os_family}${os_full_version}.${package_file_suffix}"
+      release_package_name="${_collection}-release-${os_family}${os_full_version}.${package_file_suffix}"
       ;;
     *)
       fail "Unhandled package type: '${package_type}'"
@@ -101,8 +104,10 @@ skip_if_installed
 # Get platform information
 set_platform_globals
 set_package_type "${os_family}"
+# Determine collection
+set_collection "${given_collection}" "${package}" "${version}" "${DEFAULT_COLLECTION}"
 # Set collection release package url based on platform
-set_collection_url "${platform}"
+set_collection_url "${platform}" "${collection}"
 # Download and install release package.
 # The release package has the repository metadata needed to install
 # packages from the collection using the platform package manager.

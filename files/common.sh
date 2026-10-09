@@ -573,3 +573,42 @@ is_release_package_installed() {
       ;;
   esac
 }
+
+# Derive collection from passed collection parameter, from version and
+# package parameters, or fallback to default.
+#
+# Assumes that the major version number of a package will match the
+# collection number going forward. The openbolt package is the known
+# current exception (5.x ships in openvox8).
+#
+# Does not attempt to address erroneous version numbers producing
+# non-existent collection strings (a request for openvox-agent 6.0,
+# producing openvox6, for example...). Such requests would fail to
+# find a release package. Just as a bad version string in a good
+# collection will fail to find a package.
+#
+# Sets: collection
+set_collection() {
+  local _given="$1"
+  local _package="$2"
+  local _version="$3"
+  local _default="$4"
+
+  if [[ -n "${_given}" ]]; then
+    collection="${_given}"
+  elif [[ "${_version}" =~ ^([0-9]+)(\.|$) ]]; then
+    _major="${BASH_REMATCH[1]}"
+    # Deal with non-standard package versions
+    if [[ "${_package}" == 'openbolt' ]] &&
+       [[ "${_major}" == '5' ]]; then
+      collection='openvox8'
+    else
+      collection="openvox${_major}"
+    fi
+  else
+    collection="${_default}"
+  fi
+
+  export collection # quiets shellcheck SC2034
+  assigned 'collection'
+}

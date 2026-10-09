@@ -1,6 +1,6 @@
 ---
 name: Install and Prepare Bolt
-description: "Helps with installing Bolt from the Puppet repository on Ubuntu distributions."
+description: "Helps with installing Bolt from the OpenVox repository on Ubuntu distributions."
 
 inputs:
   os-version:

@@ -86,16 +86,18 @@ jobs:
         uses: ./openvox_bootstrap/.github/actions/container_task_prep
       - name: Run install task manually for openvox-agent
         env:
-          PT_collection: openvox8
+          PT_collection: openvox9
         run: ./openvox_bootstrap/tasks/install_linux.sh
       - name: Verify openvox-agent is installed
         env:
-          PT_version: '8'
-          PT_test: 'gt'
+          PT_version: '9'
+          # TODO: Gem::Version equates 9 to 9.0.0. This test should be
+          # set back to 'gt' once we have something > 9.0.0...
+          PT_test: 'ge'
         run: ./openvox_bootstrap/tasks/check_linux.sh
       - name: Verify idempotency
         env:
-          PT_collection: openvox8
+          PT_collection: openvox9
         run: ./openvox_bootstrap/tasks/install_linux.sh
 
   test-install-version:
@@ -155,7 +157,7 @@ jobs:
           PT_package: "openvox-server"
         run: ./openvox_bootstrap/tasks/install_linux.sh
       - name: Verify openvox-server is installed
-        run: /opt/puppetlabs/bin/puppetserver --version | grep -E '8\.[0-9]+'
+        run: /opt/puppetlabs/bin/puppetserver --version | grep -E '9\.[0-9]+'
       - name: Verify idempotency
         env:
           PT_package: "openvox-server"

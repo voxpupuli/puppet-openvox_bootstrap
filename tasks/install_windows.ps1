@@ -10,7 +10,7 @@ param(
   [string]$version = "latest",
 
   [Parameter(Mandatory = $false)]
-  [string]$collection = "openvox8",
+  [string]$collection = $null,
 
   [Parameter(Mandatory = $false)]
   [string]$apt_source = "https://apt.voxpupuli.org",
@@ -23,6 +23,14 @@ param(
 )
 
 $agent_package = "openvox-agent"
+$default_collection = "openvox9"
+
+# XXX: Move this metadata out to the openvox-agent build pipeline by
+# way of a latest package symlink or similar artifact.
+$latest_versions = @{
+  "openvox8" = "8.29.0"
+  "openvox9" = "9.0.0"
+}
 
 $ErrorActionPreference = "Stop"
 
@@ -68,11 +76,22 @@ try {
     }
   }
 
+  # Resolve collection
+  if (-not $collection) {
+    if ($version -match '^(\d+)(\.|$)') {
+      $collection = "openvox$($matches[1])"
+    } else {
+      $collection = $default_collection
+    }
+  }
+
   # Resolve "latest" version if requested
-  # XXX: Move this metadata out to the openvox-agent build pipeline by way of a
-  # latest package symlink or similar artifact.
   if ($version -eq "latest") {
-    $version = '8.25.0'
+    if ($latest_versions.ContainsKey($collection)) {
+      $version = $latest_versions[$collection]
+    } else {
+      Write-Result -status "failure" -message "No known latest version for collection '$collection'. Please specify an explicit version."
+    }
   }
 
   # Build download URL

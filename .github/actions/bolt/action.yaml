@@ -1,6 +1,6 @@
 ---
 name: Install and Prepare Bolt
-description: "Helps with installing Bolt from the Puppet repository on Ubuntu distributions."
+description: "Helps with installing Bolt from the OpenVox repository on Ubuntu distributions."
 
 inputs:
   os-version:
@@ -15,6 +15,8 @@ runs:
       shell: bash
       env:
         APT_REPOSITORY: apt.voxpupuli.org
+        # TODO: Switch to openvox9 when openbolt is released in that
+        # collection.
         RELEASE_PACKAGE: ${{ format('openvox8-release-ubuntu{0}.deb', inputs.os-version) }}
       run: |-
         wget https://${APT_REPOSITORY}/${RELEASE_PACKAGE}

@@ -36,8 +36,8 @@ Assumes you have OpenBolt installed.
 
 ### openvox_bootstrap::install
 
-Installs the platform appropriate openvox8 collection release package
-and the openvox-agent package by default (Puppet<sup>:tm:</sup> 8).
+Installs the platform appropriate openvox9 collection release package
+and the openvox-agent package by default.
 
 ```sh
 bolt task run openvox_bootstrap::install \

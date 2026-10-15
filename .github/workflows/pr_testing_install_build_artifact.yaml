@@ -57,17 +57,17 @@ jobs:
       - name: Run openvox-agent install task manually
         env:
           PT__installdir: ${{ github.workspace }}
-          PT_version: "8.18.0"
+          PT_version: "9.0.0"
         run: ./openvox_bootstrap/tasks/install_build_artifact_linux.sh
       - name: Verify openvox-agent is installed
         env:
           PT__installdir: ${{ github.workspace }}
-          PT_version: "8.18.0"
+          PT_version: "9.0.0"
         run: ./openvox_bootstrap/tasks/check_linux.sh
       - name: Verify idempotency
         env:
           PT__installdir: ${{ github.workspace }}
-          PT_version: "8.18.0"
+          PT_version: "9.0.0"
         run: ./openvox_bootstrap/tasks/install_build_artifact_linux.sh
 
   test-install-build-artifact-task-noarch:
@@ -139,20 +139,20 @@ jobs:
       - name: Run openvox-agent install task manually
         env:
           PT__installdir: ${{ github.workspace }}
-          PT_version: "8.25.0"
+          PT_version: "9.1.0"
         run: ./openvox_bootstrap/tasks/install_build_artifact_linux.sh
       - name: Verify openvox-agent is installed
         env:
           PT__installdir: ${{ github.workspace }}
-          PT_version: "8.25.0"
+          PT_version: "9.1.0"
         run: ./openvox_bootstrap/tasks/check_linux.sh
       - name: Install older version of agent
         env:
           PT__installdir: ${{ github.workspace }}
-          PT_version: "8.18.0"
+          PT_version: "9.0.0"
         run: ./openvox_bootstrap/tasks/install_build_artifact_linux.sh
       - name: Verify openvox-agent is downgraded
         env:
           PT__installdir: ${{ github.workspace }}
-          PT_version: "8.18.0"
+          PT_version: "9.0.0"
         run: ./openvox_bootstrap/tasks/check_linux.sh

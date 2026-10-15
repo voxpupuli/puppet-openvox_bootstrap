@@ -274,6 +274,43 @@ jobs:
           PT_test: "ge"
         run: ./openvox_bootstrap/tasks/check_linux.sh
 
+  test-collection-downgrade:
+    strategy:
+      matrix:
+        image:
+          - rockylinux:9
+          - rockylinux/rockylinux:10
+          - fedora:43
+          # TODO: Test debians once the openvox-release packages can
+          # properly replace one another or live side by side.
+          # - debian:13
+          # - ubuntu:24.04
+    needs: shellcheck
+    runs-on: ubuntu-latest
+    container: ${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: openvox_bootstrap
+      - id: prep
+        uses: ./openvox_bootstrap/.github/actions/container_task_prep
+      - name: Run install task manually for openvox-agent
+        run: ./openvox_bootstrap/tasks/install_linux.sh
+      - name: Verify openvox-agent is installed
+        env:
+          PT_version: "9"
+          PT_test: "gt"
+        run: ./openvox_bootstrap/tasks/check_linux.sh
+      - name: Downgrade to previous collection
+        env:
+          PT_version: "8.29.0"
+        run: ./openvox_bootstrap/tasks/install_linux.sh
+      - name: Verify latest openvox-agent is installed
+        env:
+          PT_version: "9"
+          PT_test: "lt"
+        run: ./openvox_bootstrap/tasks/check_linux.sh
+
   test-redundant-release-package-install:
     strategy:
       matrix:

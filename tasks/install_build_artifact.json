@@ -14,6 +14,10 @@
       "description": "URL to the build artifacts server.",
       "type": "String[1]",
       "default": "https://artifacts.voxpupuli.org"
+    },
+    "local_package_file": {
+      "description": "Path to a package file already on the target to install instead of downloading one from artifacts_source.",
+      "type": "Optional[String[1]]"
     }
   },
   "implementations": [

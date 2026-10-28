@@ -1,5 +1,6 @@
 {
   "description": "Downloads and installs a package directly from the openvox build artifact server.",
+  "supports_noop": true,
   "parameters": {
     "package": {
       "description": "The name of the package to install.",
@@ -11,7 +12,7 @@
       "type": "String[1]"
     },
     "artifacts_source": {
-      "description": "URL to the build artifacts server.",
+      "description": "URL to the build artifacts server, or a directory on the target with the same layout.",
       "type": "String[1]",
       "default": "https://artifacts.voxpupuli.org"
     }

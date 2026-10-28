@@ -70,12 +70,15 @@ exec_and_capture() {
   return $LAST_EXEC_AND_CAPTURE_STATUS
 }
 
-# Download the given url to the given local file path.
+# Download the given url, or copy the given file, to the given local
+# file path.
 download() {
   local _url="$1"
   local _file="$2"
 
-  if exists 'wget'; then
+  if [[ -f "${_url}" ]]; then
+    exec_and_capture cp "${_url}" "${_file}"
+  elif exists 'wget'; then
     exec_and_capture wget -O "${_file}" "${_url}"
   elif exists 'curl'; then
     exec_and_capture curl --fail -sSL -o "${_file}" "${_url}"

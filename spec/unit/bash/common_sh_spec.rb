@@ -161,6 +161,15 @@ describe 'files/common.sh' do
   end
 
   context 'download()' do
+    it 'copies a local file' do
+      File.write("#{tmpdir}/package", 'contents')
+      output, status = test("download #{tmpdir}/package #{tmpdir}/file")
+
+      expect(status.success?).to be(true)
+      expect(output).to include('Executing: cp ')
+      expect(File.read("#{tmpdir}/file")).to eq('contents')
+    end
+
     context 'wget present', if: BashRspec.found(:wget) do
       it 'fails for 404' do
         output, status = test("download https://artifacts.voxpupuli.org/doesnotexist #{tmpdir}/file")

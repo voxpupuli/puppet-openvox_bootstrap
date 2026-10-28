@@ -11,6 +11,14 @@ artifacts_source=${PT_artifacts_source:-https://artifacts.voxpupuli.org}
 # shellcheck source=files/common.sh
 source "${PT__installdir}/openvox_bootstrap/files/common.sh"
 
+# In noop mode, only return the package url, with the log on stderr.
+if [[ "${PT__noop:-}" == 'true' ]]; then
+  set_platform_globals >&2
+  set_artifacts_package_url "${artifacts_source}" "${package}" "${version}" >&2
+  echo "{\"package_url\": \"${package_url}\"}"
+  exit 0
+fi
+
 # Get platform information
 set_platform_globals
 # Set url to build artifacts package based on platform

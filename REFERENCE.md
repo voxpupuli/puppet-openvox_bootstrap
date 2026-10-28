@@ -167,7 +167,7 @@ Force download and install of the Openvox release package for the collection. If
 
 Downloads and installs a package directly from the openvox build artifact server.
 
-**Supports noop?** false
+**Supports noop?** true
 
 #### Parameters
 
@@ -187,4 +187,4 @@ The version of the package to install.
 
 Data type: `String[1]`
 
-URL to the build artifacts server.
+URL to the build artifacts server, or a directory on the target with the same layout.

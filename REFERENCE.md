@@ -188,3 +188,9 @@ The version of the package to install.
 Data type: `String[1]`
 
 URL to the build artifacts server.
+
+##### `local_package_file`
+
+Data type: `Optional[String[1]]`
+
+Path to a package file already on the target to install instead of downloading one from artifacts_source.

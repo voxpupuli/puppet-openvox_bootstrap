@@ -7,9 +7,16 @@ declare PT__installdir
 version=${PT_version:-}
 package=${PT_package:-openvox-agent}
 artifacts_source=${PT_artifacts_source:-https://artifacts.voxpupuli.org}
+local_package_file=${PT_local_package_file:-}
 
 # shellcheck source=files/common.sh
 source "${PT__installdir}/openvox_bootstrap/files/common.sh"
+
+# Install a package file that is already on the target.
+if [[ -n "${local_package_file}" ]]; then
+  install_package_file "${local_package_file}"
+  exit 0
+fi
 
 # Get platform information
 set_platform_globals

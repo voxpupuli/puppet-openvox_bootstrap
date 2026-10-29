@@ -4,7 +4,15 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
-## [v1.6.0](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v1.6.0) (2026-10-16)
+## [v1.7.0](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v1.7.0) (2026-10-29)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/v1.6.0...v1.7.0)
+
+**Merged pull requests:**
+
+- Add local\_package\_file to install\_build\_artifact [\#74](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/74) ([nmburgan](https://github.com/nmburgan))
+
+## [v1.6.0](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v1.6.0) (2026-10-19)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/v1.5.0...v1.6.0)
 

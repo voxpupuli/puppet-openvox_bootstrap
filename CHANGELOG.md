@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
+## [v1.7.1](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v1.7.1) (2026-11-05)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/v1.7.0...v1.7.1)
+
+**Implemented enhancements:**
+
+- Allow the install task to skip the release package [\#78](https://github.com/voxpupuli/puppet-openvox_bootstrap/pull/78) ([silug](https://github.com/silug))
+
 ## [v1.7.0](https://github.com/voxpupuli/puppet-openvox_bootstrap/tree/v1.7.0) (2026-10-29)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-openvox_bootstrap/compare/v1.6.0...v1.7.0)

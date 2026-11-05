@@ -5,7 +5,7 @@ set -e
 # PT_* variables are set by Bolt.
 declare PT__installdir
 package=${PT_package:-openvox-agent}
-version=${PT_version:-latest}
+given_version=${PT_version:-''}
 given_collection=${PT_collection:-''}
 yum_source=${PT_yum_source:-https://yum.voxpupuli.org}
 apt_source=${PT_apt_source:-https://apt.voxpupuli.org}
@@ -13,16 +13,20 @@ stop_service=${PT_stop_service:-'false'}
 force_release_package=${PT_force_release_package:-'true'}
 manage_release_package=${PT_manage_release_package:-'true'}
 
+DEFAULT_VERSION='latest'
 DEFAULT_COLLECTION='openvox9'
+
+version=${given_version:-${DEFAULT_VERSION}}
 
 # shellcheck source=files/common.sh
 source "${PT__installdir}/openvox_bootstrap/files/common.sh"
 
-# This function will cause the script to exit if one of the conditions is met
+# This function will cause the script to exit if the requested package
+# is openvox-agent and one of the conditions is met:
 #
-# If the requested $version is
-#   1. latest and there is already an agent installed
-#   2. not latest, but $version matches the agent's version number
+# If the requested $given_version is
+#   1. empty and there is already an agent installed
+#   2. present but $given_version matches the agent's version number
 skip_if_installed() {
   # This logic only applies to the agent package because it enables
   # OpenBolt's apply_prep logic to work properly
@@ -37,8 +41,8 @@ skip_if_installed() {
     fi
 
     if [ "$installed_version" != 'none' ]; then
-      if [ "$version" = 'latest' ]; then
-        info 'Specific agent version not requested and the agent was detected. Skipping install.'
+      if [ -z "${given_version}" ]; then
+        info 'Agent version not specified and the agent was detected. Skipping install.'
         exit 0
       elif [ "$version" = "$installed_version" ]; then
         # installed agent version matched specific version requested

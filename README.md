@@ -64,7 +64,58 @@ bolt task run openvox_bootstrap::install \
   manage_release_package=false
 ```
 
-See the [install task](./REFERENCE.md#install) for details.
+See the [install task](./REFERENCE.md#install) for parameter details.
+
+#### Upgrading/Downgrading
+
+When the requested openvox package is already installed, the install
+task will upgrade or downgrade to any particular requested version.
+
+If `version=latest` then the task will upgrade to the latest version
+of the collection. (NOTE: if collection is not set, it will default to
+the latest collection.
+See [Crossing collection boundaries](#crossing-collection-boundaries) )
+
+If no version is set, version defaults to 'latest'. But the
+openvox-agent package is a special case. If the agent is already
+installed and no version is specified, then it will not be upgraded.
+This is for compatibility with Openbolt's `apply_prep` function which
+installs but does not upgrade openvox-agent on target nodes.
+
+Set the version explicitly to get the install task to upgrade
+openvox-agent.
+
+#### Crossing collection boundaries
+
+With `version=latest`, the install task will install the latest
+package version associated with the `collection`. If not set,
+`collection` itself defaults to the latest `DEFAULT_COLLECTION` value
+in the task script.
+
+Thus you can inadvertently cross a collection boundary by running
+just:
+
+```sh
+bolt task run openvox_bootstrap::install \
+  --targets <target> \
+  --run-as root \
+  version=latest
+```
+
+If, for example, you had targets with openvox8 agents that you wanted
+to upgrade to latest 8.x without crossing over to openvox9, you should
+set `collection` as well:
+
+```sh
+bolt task run openvox_bootstrap::install \
+  --targets <target> \
+  --run-as root \
+  version=latest \
+  collection=openvox8
+```
+
+Likewise, if these targets were currently openvox9 agents, the above
+would downgrade them to latest 8.x.
 
 #### Automatic Usage with OpenBolt apply_prep() function
 

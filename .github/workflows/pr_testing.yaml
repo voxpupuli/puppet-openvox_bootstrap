@@ -192,6 +192,93 @@ jobs:
           PT_version: "8.12.0"
         run: ./openvox_bootstrap/tasks/install_linux.sh
 
+  test-agent-upgrade-skipped-when-version-not-specified:
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - almalinux:8
+          - almalinux:9
+          - almalinux:10
+          - rockylinux:8
+          - rockylinux:9
+          - rockylinux/rockylinux:10
+          - debian:12
+          - debian:13
+          - fedora:43
+    needs: shellcheck
+    runs-on: ubuntu-latest
+    container: ${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: openvox_bootstrap
+      - id: prep
+        uses: ./openvox_bootstrap/.github/actions/container_task_prep
+      - name: Install older agent
+        env:
+          PT_version: '9.0.0'
+          PT_collection: openvox9
+        run: ./openvox_bootstrap/tasks/install_linux.sh
+      - name: Verify requested openvox-agent is installed
+        env:
+          PT_version: '9.0.0'
+        run: ./openvox_bootstrap/tasks/check_linux.sh
+      - name: Install again without specifying version
+        shell: bash
+        run: |-
+          output=$(./openvox_bootstrap/tasks/install_linux.sh)
+          echo "${output}"
+          grep 'Agent version not specified and the agent was detected. Skipping install.' <<<"${output}"
+      - name: Verify openvox-agent is unchanged
+        env:
+          PT_version: '9.0.0'
+        run: ./openvox_bootstrap/tasks/check_linux.sh
+
+  test-requested-upgrade:
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - almalinux:8
+          - almalinux:9
+          - almalinux:10
+          - rockylinux:8
+          - rockylinux:9
+          - rockylinux/rockylinux:10
+          - debian:12
+          - debian:13
+          - fedora:43
+          - fedora:44
+    needs: shellcheck
+    runs-on: ubuntu-latest
+    container: ${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: openvox_bootstrap
+      - id: prep
+        uses: ./openvox_bootstrap/.github/actions/container_task_prep
+      - name: Install older agent
+        env:
+          PT_version: '9.0.0'
+          PT_collection: openvox9
+        run: ./openvox_bootstrap/tasks/install_linux.sh
+      - name: Verify requested openvox-agent is installed
+        env:
+          PT_version: '9.0.0'
+        run: ./openvox_bootstrap/tasks/check_linux.sh
+      - name: Install latest
+        shell: bash
+        env:
+          PT_version: 'latest'
+        run: ./openvox_bootstrap/tasks/install_linux.sh
+      - name: Verify openvox-agent is upgraded
+        env:
+          PT_version: '9.0.0'
+          PT_test: 'gt'
+        run: ./openvox_bootstrap/tasks/check_linux.sh
+
   test-downgrade:
     strategy:
       matrix:
@@ -271,7 +358,7 @@ jobs:
       - name: Verify latest openvox-agent is installed
         env:
           PT_version: "9"
-          PT_test: "ge"
+          PT_test: "gt"
         run: ./openvox_bootstrap/tasks/check_linux.sh
 
   test-collection-downgrade:

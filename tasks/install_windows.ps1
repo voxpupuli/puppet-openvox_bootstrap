@@ -7,7 +7,7 @@ param(
   [string]$package = "openvox-agent",
 
   [Parameter(Mandatory = $false)]
-  [string]$version = "latest",
+  [string]$version = $null,
 
   [Parameter(Mandatory = $false)]
   [string]$collection = $null,
@@ -24,6 +24,10 @@ param(
 
 $agent_package = "openvox-agent"
 $default_collection = "openvox9"
+if (-not $version) {
+  $version_not_given = $true
+  $version = "latest"
+}
 
 # XXX: Move this metadata out to the openvox-agent build pipeline by
 # way of a latest package symlink or similar artifact.
@@ -56,7 +60,9 @@ try {
 
   if ($installed) {
     $installedVersion = $installed.DisplayVersion
-    if ($installedVersion -eq $version) {
+    if ($version_not_given) {
+      Write-Result -status "skipped" -message "Agent version not specified and the agent was detected. Skipping install."
+    } elseif ($installedVersion -eq $version) {
       Write-Result -status "skipped" -message "$agent_package $version is already installed." @{ version = $installedVersion }
     }
   }

@@ -54,8 +54,15 @@ if ($package -ne $agent_package) {
 
 try {
   # Detect if already installed
-  $installed = Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* |
-    Where-Object { $_.DisplayName -like "$agent_package*" } |
+  $uninstall_paths = @(
+    'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*',
+    'HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'
+  )
+  $installed_info = Get-ItemProperty $uninstall_paths -ErrorAction SilentlyContinue
+  # The -match operator is case insensitive apparently...
+  $package_pattern = $agent_package -replace '-', '.?'
+  $installed = $installed_info |
+    Where-Object { $_.DisplayName -match $package_pattern } |
     Select-Object -First 1
 
   if ($installed) {

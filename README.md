@@ -44,6 +44,7 @@ bolt task run openvox_bootstrap::install \
   --targets <target> \
   --run-as root
 ```
+
 #### parameters
 
 By default the task will install the openvox-agent package, but this
@@ -116,6 +117,13 @@ bolt task run openvox_bootstrap::install \
 
 Likewise, if these targets were currently openvox9 agents, the above
 would downgrade them to latest 8.x.
+
+#### Upgrading Windows nodes
+
+Along with setting `version`, you must also set `stop_service=true`
+for the install task to upgrade a Window's target.
+
+If the service was running, it will be restarted after the install.
 
 #### Automatic Usage with OpenBolt apply_prep() function
 

@@ -248,7 +248,6 @@ jobs:
           - rockylinux/rockylinux:10
           - debian:12
           - debian:13
-          - fedora:43
           - fedora:44
     needs: shellcheck
     runs-on: ubuntu-latest
@@ -274,10 +273,18 @@ jobs:
           PT_version: 'latest'
         run: ./openvox_bootstrap/tasks/install_linux.sh
       - name: Verify openvox-agent is upgraded
+        if: ${{ !startsWith(matrix.image, 'fedora:') }}
         env:
           PT_version: '9.0.0'
           PT_test: 'gt'
         run: ./openvox_bootstrap/tasks/check_linux.sh
+      - name: (fedora) Verify openvox-agent is not upgraded because dnf.conf does not have best set
+        if: ${{ startsWith(matrix.image, 'fedora:') }}
+        env:
+          PT_version: '9.0.0'
+        run: |-
+          cat /etc/dnf/dnf.conf
+          ./openvox_bootstrap/tasks/check_linux.sh
 
   test-downgrade:
     strategy:

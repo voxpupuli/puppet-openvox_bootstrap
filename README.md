@@ -86,6 +86,22 @@ installs but does not upgrade openvox-agent on target nodes.
 Set the version explicitly to get the install task to upgrade
 openvox-agent.
 
+##### Upgrading Fedora
+
+Note that whether a package upgrades when using `version=latest`
+depends on local package management configuration. Ultimately on *nix,
+the script is calling either an apt or dnf install *package-name*.
+Notably, on Fedora, if `dnf.conf` does not have `best` set to True
+(which is the case in the containers used for testing, at least), the
+solver will not upgrade unless given a version number.
+
+##### Upgrading Windows nodes
+
+Along with setting `version`, you must also set `stop_service=true`
+for the install task to upgrade a Window's target.
+
+If the service was running, it will be restarted after the install.
+
 #### Crossing collection boundaries
 
 With `version=latest`, the install task will install the latest
@@ -117,13 +133,6 @@ bolt task run openvox_bootstrap::install \
 
 Likewise, if these targets were currently openvox9 agents, the above
 would downgrade them to latest 8.x.
-
-#### Upgrading Windows nodes
-
-Along with setting `version`, you must also set `stop_service=true`
-for the install task to upgrade a Window's target.
-
-If the service was running, it will be restarted after the install.
 
 #### Automatic Usage with OpenBolt apply_prep() function
 

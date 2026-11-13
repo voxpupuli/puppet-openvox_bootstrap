@@ -131,7 +131,7 @@ The name of the package to install.
 
 Data type: `Optional[String]`
 
-The version of the openvox package to install.
+The version of the openvox package to install. This should be either a version number or the string 'latest' for latest in collection. For openvox-agent specifically, the task will install, but not upgrade unless a value is provided for version (number or 'latest'). All other packages fall back to 'latest' if no version is set.
 
 ##### `collection`
 

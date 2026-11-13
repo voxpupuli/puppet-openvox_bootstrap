@@ -7,7 +7,7 @@ param(
   [string]$package = "openvox-agent",
 
   [Parameter(Mandatory = $false)]
-  [string]$version = "latest",
+  [string]$version = $null,
 
   [Parameter(Mandatory = $false)]
   [string]$collection = $null,
@@ -24,12 +24,16 @@ param(
 
 $agent_package = "openvox-agent"
 $default_collection = "openvox9"
+if (-not $version) {
+  $version_not_given = $true
+  $version = "latest"
+}
 
 # XXX: Move this metadata out to the openvox-agent build pipeline by
 # way of a latest package symlink or similar artifact.
 $latest_versions = @{
-  "openvox8" = "8.29.0"
-  "openvox9" = "9.0.0"
+  "openvox8" = "8.32.0"
+  "openvox9" = "9.3.0"
 }
 
 $ErrorActionPreference = "Stop"
@@ -50,13 +54,22 @@ if ($package -ne $agent_package) {
 
 try {
   # Detect if already installed
-  $installed = Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* |
-    Where-Object { $_.DisplayName -like "$agent_package*" } |
+  $uninstall_paths = @(
+    'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*',
+    'HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'
+  )
+  $installed_info = Get-ItemProperty $uninstall_paths -ErrorAction SilentlyContinue
+  # The -match operator is case insensitive apparently...
+  $package_pattern = $agent_package -replace '-', '.?'
+  $installed = $installed_info |
+    Where-Object { $_.DisplayName -match $package_pattern } |
     Select-Object -First 1
 
   if ($installed) {
     $installedVersion = $installed.DisplayVersion
-    if ($installedVersion -eq $version) {
+    if ($version_not_given) {
+      Write-Result -status "skipped" -message "Agent version not specified and the agent was detected. Skipping install."
+    } elseif ($installedVersion -eq $version) {
       Write-Result -status "skipped" -message "$agent_package $version is already installed." @{ version = $installedVersion }
     }
   }

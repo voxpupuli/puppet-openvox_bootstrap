@@ -15,9 +15,7 @@ runs:
       shell: bash
       env:
         APT_REPOSITORY: apt.voxpupuli.org
-        # TODO: Switch to openvox9 when openbolt is released in that
-        # collection.
-        RELEASE_PACKAGE: ${{ format('openvox8-release-ubuntu{0}.deb', inputs.os-version) }}
+        RELEASE_PACKAGE: ${{ format('openvox9-release-ubuntu{0}.deb', inputs.os-version) }}
       run: |-
         wget https://${APT_REPOSITORY}/${RELEASE_PACKAGE}
         sudo dpkg -i ${RELEASE_PACKAGE}

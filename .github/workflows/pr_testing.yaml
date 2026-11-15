@@ -43,11 +43,11 @@ jobs:
         with:
           os-version: ${{ matrix.os-version }}
       - name: Run install task for openvox-agent
-        run: bolt task run openvox_bootstrap::install collection=openvox8 --targets localhost --run-as root
+        run: bolt task run openvox_bootstrap::install collection=openvox9 --targets localhost --run-as root
       - name: Verify openvox-agent is installed
         run: bolt task run openvox_bootstrap::check --targets localhost --run-as root
       - name: Verify idempotency
-        run: bolt task run openvox_bootstrap::install collection=openvox8 --targets localhost --run-as root
+        run: bolt task run openvox_bootstrap::install collection=openvox9 --targets localhost --run-as root
       - name: Verify that check task can provide a negative result
         run: |-
           if bolt task run openvox_bootstrap::check --targets localhost --run-as root version=8 test=lt; then

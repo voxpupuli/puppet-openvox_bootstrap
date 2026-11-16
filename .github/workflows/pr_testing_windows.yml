@@ -91,3 +91,43 @@ jobs:
       - name: Verify openvox-agent is downgraded
         shell: powershell
         run: ./openvox_bootstrap/tasks/check_windows.ps1 -version "8.22.1"
+
+  test-upgrade-on-windows:
+    runs-on: windows-latest
+    needs: lint-powershell
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: openvox_bootstrap
+      - name: Install older agent in collection
+        shell: powershell
+        run: ./openvox_bootstrap/tasks/install_windows.ps1 -version "9.0.0"
+      - name: Verify openvox-agent is installed
+        shell: powershell
+        run: ./openvox_bootstrap/tasks/check_windows.ps1
+      - name: Install latest agent
+        shell: powershell
+        run: ./openvox_bootstrap/tasks/install_windows.ps1 -version "latest" -stop_service $true
+      - name: Verify openvox-agent is downgraded
+        shell: powershell
+        run: ./openvox_bootstrap/tasks/check_windows.ps1 -version "9.0.0" -test "gt"
+
+  test-upgrade-without-version-skips-reinstall:
+    runs-on: windows-latest
+    needs: lint-powershell
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: openvox_bootstrap
+      - name: Install older agent in collection
+        shell: powershell
+        run: ./openvox_bootstrap/tasks/install_windows.ps1 -version "9.0.0"
+      - name: Verify openvox-agent is installed
+        shell: powershell
+        run: ./openvox_bootstrap/tasks/check_windows.ps1
+      - name: Install again without specifying version
+        shell: powershell
+        run: ./openvox_bootstrap/tasks/install_windows.ps1 -stop_service $true
+      - name: Verify openvox-agent is not upgraded
+        shell: powershell
+        run: ./openvox_bootstrap/tasks/check_windows.ps1 -version "9.0.0"
